@@ -1,0 +1,39 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: springboot-mysql-stage
+    restart: always
+    env_file:
+      - .env.stage
+    volumes:
+      - mysql_stage_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "1024M"
+
+  app:
+    build: .
+    container_name: springboot-app-stage
+    restart: always
+    env_file:
+      - .env.stage
+    volumes:
+      - ./logs:/app/logs
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "1024M"
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xms512m -Xmx768m # 컨테이너 1GB 중 자바 힙에 768MB 할당
+
+volumes:
+  mysql_stage_data:
