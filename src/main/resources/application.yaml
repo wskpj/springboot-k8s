@@ -7,6 +7,10 @@ spring:
     driver-class-name: ${DB_DRIVER}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    hikari:
+      minimum-idle: ${DB_CONN_MINIMUM_IDLE}
+      maximum-pool-size: ${DB_CONN_MAXIMUM_POOL_SIZE}
+      connection-timeout: ${DB_CONN_CONNECTION_TIMEOUT}
   
   h2:
     console:
