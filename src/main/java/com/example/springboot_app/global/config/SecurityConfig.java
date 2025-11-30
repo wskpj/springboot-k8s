@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/stress/db/transaction").authenticated()
                         .requestMatchers("/api/v1/stress/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
