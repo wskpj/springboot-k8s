@@ -1,0 +1,1 @@
+watch -n 1 "kubectl get hpa; echo; kubectl top pod -l app=postgres-stage; echo; kubectl get pods;"
