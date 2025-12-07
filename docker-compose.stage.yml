@@ -1,10 +1,11 @@
 services:
-  db:
+  mysql-stage:
     image: mysql:8.0
     container_name: springboot-mysql-stage
     restart: always
     env_file:
       - .env.stage
+      - .secret.env.stage
     volumes:
       - mysql_stage_data:/var/lib/mysql
     ports:
@@ -15,12 +16,13 @@ services:
           cpus: "1"
           memory: "1024M"
 
-  app:
+  app-stage:
     build: .
     container_name: springboot-app-stage
     restart: always
     env_file:
       - .env.stage
+      - .secret.env.stage
     volumes:
       - ./logs:/app/logs
     ports:
