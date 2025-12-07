@@ -17,6 +17,20 @@ spec:
           image: grafana/loki:2.9.2
           ports:
             - containerPort: 3100
+          env:
+            - name: TZ
+              value: Asia/Seoul
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          volumeMounts:
+            - name: loki-data
+              mountPath: /loki  # Loki의 실제 데이터 저장 경로
+      volumes:
+        - name: loki-data
+          hostPath:
+            path: /kind/data/loki
+            type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
@@ -112,6 +126,8 @@ spec:
           args:
             - -config.file=/etc/promtail/promtail.yaml
           env:
+            - name: TZ
+              value: Asia/Seoul
             - name: HOSTNAME
               valueFrom:
                 fieldRef:
