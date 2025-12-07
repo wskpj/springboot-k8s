@@ -1,0 +1,20 @@
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus-stage:9090
+    isDefault: true
+    uid: prometheusdatasource
+    editable: true
+    jsonData:
+      httpMethod: POST
+      timeInterval: "5s"
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki-stage:3100
+    uid: lokidatasource
+    editable: true
+    jsonData:
+      maxLines: 1000

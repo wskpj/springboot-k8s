@@ -39,7 +39,7 @@
       },
       "id": 27,
       "panels": [],
-      "title": "Pod - Mysql",
+      "title": "Mysql - Pod",
       "type": "row"
     },
     {
@@ -49,31 +49,126 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 10,
-            "lineWidth": 2
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
-          "unit": "cores"
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU Limit"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    5,
+                    5
+                  ],
+                  "fill": "dash"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 8,
         "x": 0,
         "y": 1
       },
-      "id": 101,
+      "id": 103,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
       "targets": [
         {
-          "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{container=\"mysql\", pod=~\"mysql-stage.*\"})",
-          "legendFormat": "Actual Usage",
+          "datasource": {
+            "uid": "prometheusdatasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{container=\"mysql\", pod=~\"[[mysql_pod]]\"}[1m])) by (pod)",
+          "hide": false,
+          "legendFormat": "Usage: {{pod}}",
+          "range": true,
           "refId": "A"
         },
         {
-          "expr": "kube_pod_container_resource_limits{container=\"mysql\", pod=~\"mysql-stage.*\", resource=\"cpu\"}",
-          "legendFormat": "CPU Limit",
+          "datasource": {
+            "uid": "prometheusdatasource"
+          },
+          "editorMode": "code",
+          "expr": "kube_pod_container_resource_limits{container=\"mysql\", pod=~\"[[mysql_pod]]\", resource=\"cpu\"}",
+          "hide": false,
+          "legendFormat": "Limit: {{pod}}",
+          "range": true,
           "refId": "B"
         }
       ],
@@ -81,16 +176,250 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheusdatasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 1
+      },
+      "id": 104,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheusdatasource"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(container_memory_working_set_bytes{container=\"mysql\", pod=~\"[[mysql_pod]]\"}) by (pod)",
+          "format": "time_series",
+          "instant": false,
+          "legendFormat": "Usage: {{pod}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheusdatasource"
+          },
+          "editorMode": "code",
+          "expr": "kube_pod_container_resource_limits{container=\"mysql\", pod=~\"[[mysql_pod]]\", resource=\"memory\"}",
+          "format": "time_series",
+          "instant": false,
+          "legendFormat": "Limit: {{pod}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "MySQL Memory Usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheusdatasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "red",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "Throttled Time: mysql-stage-685fbc9989-x8rmj"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 1
+      },
+      "id": 102,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheusdatasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(container_cpu_cfs_throttled_seconds_total{container=\"mysql\", pod=~\"[[mysql_pod]]\"}[1m])) by (pod)",
+          "legendFormat": "Throttled Time: {{pod}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "MySQL CPU Throttling",
+      "type": "timeseries"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 9
       },
-      "id": 26,
+      "id": 25,
       "panels": [],
-      "title": "Springboot - Internal",
+      "title": "Springboot - Pod",
       "type": "row"
     },
     {
@@ -101,28 +430,241 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "red",
-            "mode": "fixed"
+            "mode": "palette-classic"
           },
-          "unit": "s"
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU Limit"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    5,
+                    5
+                  ],
+                  "fill": "dash"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 10
+      },
+      "id": 111,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "uid": "prometheusdatasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{container=\"springboot-app\", pod=~\"[[app_pod]]\"}[1m])) by (pod)",
+          "hide": false,
+          "legendFormat": "Usage: {{pod}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "uid": "prometheusdatasource"
+          },
+          "editorMode": "code",
+          "expr": "kube_pod_container_resource_limits{container=\"springboot-app\", pod=~\"[[app_pod]]\", resource=\"cpu\"}",
+          "hide": false,
+          "legendFormat": "Limit: {{pod}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Springboot CPU Usage vs Limit",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheusdatasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 1
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 10
       },
-      "id": 102,
+      "id": 112,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
       "targets": [
         {
-          "expr": "sum(increase(container_cpu_cfs_throttled_seconds_total{container=\"mysql\", pod=~\"mysql-stage.*\"}[1m]))",
-          "legendFormat": "Throttled Time",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheusdatasource"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(container_memory_working_set_bytes{container=\"springboot-app\", pod=~\"[[app_pod]]\"}) by (pod)",
+          "format": "time_series",
+          "instant": false,
+          "legendFormat": "Usage: {{pod}}",
+          "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheusdatasource"
+          },
+          "editorMode": "code",
+          "expr": "kube_pod_container_resource_limits{container=\"springboot-app\", pod=~\"[[app_pod]]\", resource=\"memory\"}",
+          "format": "time_series",
+          "instant": false,
+          "legendFormat": "Limit: {{pod}}",
+          "range": true,
+          "refId": "B"
         }
       ],
-      "title": "MySQL CPU Throttling",
+      "title": "Springboot Memory Usage",
       "type": "timeseries"
     },
     {
@@ -136,25 +678,90 @@
             "fixedColor": "red",
             "mode": "fixed"
           },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
           "unit": "s"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 1
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 10
       },
-      "id": 103,
+      "id": 113,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
       "targets": [
         {
-          "expr": "sum(increase(container_cpu_cfs_throttled_seconds_total{container=\"mysql\"}[1m]))",
-          "legendFormat": "Throttled Time",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheusdatasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(container_cpu_cfs_throttled_seconds_total{container=\"springboot-app\", pod=~\"[[app_pod]]\"}[1m])) by (pod)",
+          "legendFormat": "Throttled Time: {{pod}}",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "DB CPU Throttling (병목 지표)",
+      "title": "Springboot CPU Throttling",
       "type": "timeseries"
     },
     {
@@ -163,11 +770,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 2
+        "y": 19
       },
-      "id": 25,
+      "id": 26,
       "panels": [],
-      "title": "Springboot - Log",
+      "title": "Springboot - Internal",
       "type": "row"
     },
     {
@@ -217,14 +824,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "pps"
         },
         "overrides": [
           {
@@ -278,7 +887,7 @@
         "h": 9,
         "w": 6,
         "x": 0,
-        "y": 3
+        "y": 20
       },
       "id": 14,
       "options": {
@@ -294,7 +903,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -302,7 +911,7 @@
             "uid": "lokidatasource"
           },
           "editorMode": "code",
-          "expr": "sum by(level) (\r\n  rate(\r\n    {app=\"springboot-app-stage\"} \r\n    | json \r\n    | level =~ \"WARN|ERROR\" \r\n    |= \"$log_keyword\" \r\n    [1m]\r\n  ) * 100\r\n)",
+          "expr": "sum by(level) (\r\n  rate(\r\n    {app=~\"[[app_name]]\", pod=~\"[[app_pod]]\"} \r\n    | json \r\n    | level =~ \"[[log_level]]\" \r\n    |= \"$log_keyword\" \r\n    [1m]\r\n  )\r\n)",
           "legendFormat": "{{type}}",
           "queryType": "range",
           "refId": "A"
@@ -320,7 +929,7 @@
         "h": 9,
         "w": 18,
         "x": 6,
-        "y": 3
+        "y": 20
       },
       "id": 2,
       "options": {
@@ -329,9 +938,9 @@
         "prettifyLogMessage": false,
         "showCommonLabels": false,
         "showLabels": false,
-        "showTime": false,
+        "showTime": true,
         "sortOrder": "Descending",
-        "wrapLogMessage": true
+        "wrapLogMessage": false
       },
       "pluginVersion": "8.4.3",
       "targets": [
@@ -341,13 +950,13 @@
             "uid": "lokidatasource"
           },
           "editorMode": "code",
-          "expr": "{app=\"springboot-app-stage\"} | json | level =~ \"WARN|ERROR\"",
+          "expr": "{app=~\"[[app_name]]\", pod=~\"[[app_pod]]\"} | json | level =~ \"[[log_level]]\" | line_format \"{{.level}} [{{.logger_name}}] {{.message}}\"",
           "hide": false,
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "WARN/ERROR Logs",
+      "title": "Application Logs",
       "type": "logs"
     },
     {
@@ -356,11 +965,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 29
       },
       "id": 24,
       "panels": [],
-      "title": "Request",
+      "title": "Ingress / Response Analysis",
       "type": "row"
     },
     {
@@ -375,7 +984,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -387,7 +997,7 @@
         "h": 8,
         "w": 6,
         "x": 0,
-        "y": 13
+        "y": 30
       },
       "id": 4,
       "options": {
@@ -458,7 +1068,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -473,7 +1084,7 @@
         "h": 8,
         "w": 6,
         "x": 6,
-        "y": 13
+        "y": 30
       },
       "id": 22,
       "options": {
@@ -523,7 +1134,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -535,7 +1147,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 13
+        "y": 30
       },
       "id": 16,
       "options": {
@@ -614,7 +1226,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -630,7 +1243,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 21
+        "y": 38
       },
       "id": 6,
       "options": {
@@ -717,7 +1330,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -733,7 +1347,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 21
+        "y": 38
       },
       "id": 12,
       "options": {
@@ -815,7 +1429,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red"
+                "color": "red",
+                "value": null
               },
               {
                 "color": "green",
@@ -831,7 +1446,7 @@
         "h": 9,
         "w": 6,
         "x": 0,
-        "y": 30
+        "y": 47
       },
       "id": 18,
       "options": {
@@ -913,7 +1528,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -929,7 +1545,7 @@
         "h": 9,
         "w": 6,
         "x": 6,
-        "y": 30
+        "y": 47
       },
       "id": 20,
       "options": {
@@ -1010,7 +1626,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1026,7 +1643,7 @@
         "h": 9,
         "w": 6,
         "x": 12,
-        "y": 30
+        "y": 47
       },
       "id": 23,
       "options": {
@@ -1107,7 +1724,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1123,7 +1741,7 @@
         "h": 9,
         "w": 6,
         "x": 18,
-        "y": 30
+        "y": 47
       },
       "id": 8,
       "options": {
@@ -1164,36 +1782,36 @@
   "templating": {
     "list": [
       {
+        "allValue": ".+",
         "current": {
-          "isNone": true,
-          "selected": false,
+          "selected": true,
           "text": "None",
-          "value": ""
+          "value": "None"
         },
         "datasource": {
           "type": "prometheus",
           "uid": "prometheusdatasource"
         },
-        "definition": "label_values(application)",
+        "definition": "label_values(http_server_requests_seconds_count, application)",
         "hide": 0,
         "includeAll": false,
-        "label": "Application Name",
+        "label": "App Name",
         "multi": false,
         "name": "app_name",
         "options": [],
         "query": {
-          "query": "label_values(application)",
+          "query": "label_values(http_server_requests_seconds_count, application)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 1,
         "type": "query"
       },
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "",
           "value": ""
         },
@@ -1211,11 +1829,128 @@
         "query": "",
         "skipUrlSync": false,
         "type": "textbox"
+      },
+      {
+        "allValue": ".+",
+        "current": {
+          "selected": false,
+          "text": [
+            "WARN",
+            "ERROR",
+            "INFO",
+            "DEBUG"
+          ],
+          "value": [
+            "WARN",
+            "ERROR",
+            "INFO",
+            "DEBUG"
+          ]
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "Log Level",
+        "multi": true,
+        "name": "log_level",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": true,
+            "text": "DEBUG",
+            "value": "DEBUG"
+          },
+          {
+            "selected": true,
+            "text": "INFO",
+            "value": "INFO"
+          },
+          {
+            "selected": true,
+            "text": "WARN",
+            "value": "WARN"
+          },
+          {
+            "selected": true,
+            "text": "ERROR",
+            "value": "ERROR"
+          }
+        ],
+        "query": "DEBUG,INFO,WARN,ERROR",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": ".+",
+        "current": {
+          "selected": false,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheusdatasource"
+        },
+        "definition": "label_values(container_cpu_usage_seconds_total{pod=~\"mysql-stage.*\"}, pod)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "MySQL Pod",
+        "multi": true,
+        "name": "mysql_pod",
+        "options": [],
+        "query": {
+          "query": "label_values(container_cpu_usage_seconds_total{pod=~\"mysql-stage.*\"}, pod)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".+",
+        "current": {
+          "selected": false,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheusdatasource"
+        },
+        "definition": "label_values(container_cpu_usage_seconds_total{pod=~\"springboot-app-stage.*\"}, pod)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "App Pod",
+        "multi": true,
+        "name": "app_pod",
+        "options": [],
+        "query": {
+          "query": "label_values(container_cpu_usage_seconds_total{pod=~\"springboot-app-stage.*\"}, pod)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-24h",
     "to": "now"
   },
   "timeRangeUpdatedDuringEditOrView": false,
@@ -1223,6 +1958,6 @@
   "timezone": "",
   "title": "My Dashboard",
   "uid": "dLsDQIUnzb",
-  "version": 10,
+  "version": 22,
   "weekStart": ""
 }
