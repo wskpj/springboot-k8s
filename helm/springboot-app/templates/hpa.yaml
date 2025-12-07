@@ -1,0 +1,25 @@
+{{- if .Values.application.hpa.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "springboot-app.fullname" . }}-hpa
+  labels:
+    {{- include "springboot-app.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "springboot-app.fullname" . }}
+  minReplicas: {{ .Values.application.hpa.minReplicas }}
+  maxReplicas: {{ .Values.application.hpa.maxReplicas }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.application.hpa.targetCPUUtilizationPercentage }}
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 60
+{{- end }}

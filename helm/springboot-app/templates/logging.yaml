@@ -1,0 +1,130 @@
+{{- if .Values.logging.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loki-stage
+  labels:
+    {{- include "springboot-app.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loki-stage
+  template:
+    metadata:
+      labels:
+        app: loki-stage
+    spec:
+      containers:
+        - name: loki
+          image: {{ .Values.logging.loki.image }}
+          ports:
+            - containerPort: 3100
+          env:
+            - name: TZ
+              value: Asia/Seoul
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          volumeMounts:
+            - name: loki-data
+              mountPath: /loki
+      volumes:
+        - name: loki-data
+          hostPath:
+            path: /kind/data/loki
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki-stage
+  labels:
+    {{- include "springboot-app.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.logging.loki.service.port }}
+      targetPort: 3100
+  selector:
+    app: loki-stage
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: promtail-clusterrole
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "nodes/proxy", "services", "endpoints", "pods"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: promtail-serviceaccount
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: promtail-clusterrolebinding
+subjects:
+  - kind: ServiceAccount
+    name: promtail-serviceaccount
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: promtail-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: promtail-stage
+  labels:
+    {{- include "springboot-app.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: promtail-stage
+  template:
+    metadata:
+      labels:
+        app: promtail-stage
+    spec:
+      serviceAccountName: promtail-serviceaccount
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: promtail
+          image: {{ .Values.logging.promtail.image }}
+          args:
+            - -config.file=/etc/promtail/promtail.yaml
+          env:
+            - name: TZ
+              value: Asia/Seoul
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          volumeMounts:
+            - name: config
+              mountPath: /etc/promtail
+            - name: pods
+              mountPath: /var/log/pods
+              readOnly: true
+            - name: docker
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Values.logging.promtail.existingConfigMap }}
+        - name: pods
+          hostPath:
+            path: /var/log/pods
+        - name: docker
+          hostPath:
+            path: /var/lib/docker/containers
+{{- end }}

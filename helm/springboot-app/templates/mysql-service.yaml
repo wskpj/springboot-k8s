@@ -1,0 +1,15 @@
+{{- if .Values.mysql.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-stage
+  labels:
+    {{- include "springboot-app.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: mysql-stage
+  ports:
+    - protocol: TCP
+      port: {{ .Values.mysql.service.port }}
+      targetPort: 3306
+{{- end }}

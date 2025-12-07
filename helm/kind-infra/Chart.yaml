@@ -1,0 +1,6 @@
+apiVersion: v2
+name: kind-infra
+description: A Helm chart for Kind cluster infrastructure (Metrics Server, Ingress Nginx)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
