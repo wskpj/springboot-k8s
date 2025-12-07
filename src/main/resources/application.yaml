@@ -11,6 +11,7 @@ spring:
       minimum-idle: ${DB_CONN_MINIMUM_IDLE}
       maximum-pool-size: ${DB_CONN_MAXIMUM_POOL_SIZE}
       connection-timeout: ${DB_CONN_CONNECTION_TIMEOUT}
+      register-mbeans: ${DB_CONN_REGISTER_MBEANS}
   
   h2:
     console:
@@ -19,17 +20,15 @@ spring:
   
   jpa:
     hibernate:
-      ddl-auto: ${JPA_DDL_AUTO}
+      ddl-auto: ${HIBERNATE_DDL_AUTO}
     properties:
       hibernate:
+        show_sql: ${HIBERNATE_SHOW_SQL}
         format_sql: ${HIBERNATE_FORMAT_SQL}
-        show_sql: ${JPA_SHOW_SQL}
+        generate_statistics: ${HIBERNATE_GENERATE_STATISTICS}
 
   lifecycle:
     timeout-per-shutdown-phase: ${SHUTDOWN_TIMEOUT}
-
-server:
-  shutdown: graceful
 
 management:
   metrics:
@@ -42,19 +41,20 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, prometheus
+        include: health, prometheus, metrics
+
+server:
+  shutdown: graceful
+
+logging:
+  level:
+    com.zaxxer.hikari: ${HIBERNATE_LOG_LEVEL}
+    org.hibernate:
+        SQL: ${HIBERNATE_LOG_LEVEL}
+        stat: ${HIBERNATE_LOG_LEVEL}
+        type.descriptor.sql.BasicBinder: ${HIBERNATE_LOG_LEVEL}
 
 jwt:
   secret: ${JWT_SECRET}
   access-token-validity-in-seconds: ${JWT_ACCESS_EXPIRATION}
   refresh-token-validity-in-seconds: ${JWT_REFRESH_EXPIRATION}
-
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: ${HIBERNATE_LOG_LEVEL}
-        type:
-          descriptor:
-            sql:
-              BasicBinder: ${HIBERNATE_LOG_LEVEL}
