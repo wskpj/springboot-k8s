@@ -106,6 +106,14 @@ public class LoadTestController {
         return ApiResult.success("Burned DB via Reads. Iterations: " + iterations + ", Total Evaluated Count Iterations Sum: " + totalUsersScanned + ", Elapsed Time: " + elapsed + "ms");
     }
 
+    @Operation(summary = "쿠폰 재고 조회", description = "특정 쿠폰의 현재 재고 수량을 조회합니다.")
+    @GetMapping("/coupon/stock")
+    public ApiResult<Integer> getCouponStock(@RequestParam(defaultValue = "1") Long couponId) {
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new IllegalArgumentException("Coupon not found: id=" + couponId));
+        return ApiResult.success(coupon.getStock());
+    }
+
     @Operation(summary = "DB 트랜잭션 부하 테스트 (쿠폰 발급 시나리오)", description = "JWT Decode, 쿠폰 재고 감소(Update) 및 발급 이력 기록(Insert)을 트랜잭션으로 처리하는 부하 시나리오")
     @GetMapping("/db/transaction")
     @Transactional
@@ -128,5 +136,42 @@ public class LoadTestController {
         log.info("DB Transaction Load Test (Coupon): email={}, couponId={}, elapsed {} ms", userEmail, couponId, elapsed);
         
         return ApiResult.success("Burned DB via Transaction. Decreased stock & Inserted UserCoupon. Elapsed Time: " + elapsed + "ms");
+    }
+
+    @Operation(
+        summary = "DB 락 경합 부하 테스트 (비관적 락)"
+    )
+    @GetMapping("/db/lock-contention")
+    @Transactional
+    public ApiResult<String> dbLockContention(
+            Principal principal,
+            @RequestParam(defaultValue = "1") Long couponId,
+            @RequestParam(defaultValue = "0") long holdMs
+    ) throws InterruptedException {
+        long start = System.currentTimeMillis();
+        String userEmail = principal.getName();
+
+        // 비관적 락 획득 (SELECT ... FOR UPDATE)
+        // 이 시점부터 동일 couponId 행에 대해 다른 트랜잭션은 대기 상태가 됩니다.
+        Coupon coupon = couponRepository.findByIdWithPessimisticLock(couponId)
+                .orElseThrow(() -> new IllegalArgumentException("Coupon not found: id=" + couponId));
+
+        long lockAcquired = System.currentTimeMillis();
+        log.info("Lock acquired: email={}, couponId={}, waitForLock={} ms", userEmail, couponId, lockAcquired - start);
+
+        // holdMs 동안 인위적으로 락을 보유 → 동시 요청 시 나머지 스레드가 이 시간만큼 대기
+        Thread.sleep(holdMs);
+
+        // 락 보유 상태에서 재고 감소 및 이력 기록
+        coupon.decreaseStock();
+        userCouponRepository.save(new UserCoupon(userEmail, couponId));
+
+        long elapsed = System.currentTimeMillis() - start;
+        log.info("Lock released: email={}, couponId={}, holdMs={}, totalElapsed={} ms", userEmail, couponId, holdMs, elapsed);
+
+        return ApiResult.success(String.format(
+                "Lock contention test done. couponId=%d, holdMs=%d, totalElapsed=%d ms, remainingStock=%d",
+                couponId, holdMs, elapsed, coupon.getStock()
+        ));
     }
 }
