@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# 배포할 리소스 목록
+resources:
+  - k8s/stage/mysql.yaml
+  - k8s/stage/springboot.yaml
+  - k8s/stage/logging.yaml
+  - k8s/stage/monitoring.yaml
+  - k8s/stage/ingress.yaml
+  - k8s/stage/hpa.yaml
+
+# ConfigMap 자동 생성
+configMapGenerator:
+  - name: springboot-stage-config
+    envs:
+      - .env.stage
+
+# Secret 자동 생성
+secretGenerator:
+  - name: springboot-stage-secret
+    envs:
+      - .secret.env.stage

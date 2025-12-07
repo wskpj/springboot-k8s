@@ -10,9 +10,8 @@ docker build -t springboot-app:latest .
 echo "[2/4] Loading Image to Kind Cluster..."
 kind load docker-image springboot-app:latest
 
-echo "[3/4] Applying K8s Manifests (Config, HPA, Deployments)..."
-kubectl apply -f k8s/stage/
-kubectl apply -f k8s/stage/hpa.yaml
+echo "[3/4] Applying K8s Manifests via Kustomize (ConfigMap, Secrets, Patches)..."
+kubectl apply -k .
 
 echo "[4/4] Restarting Spring Boot Pods to apply new code..."
 kubectl rollout restart deployment springboot-app-stage
