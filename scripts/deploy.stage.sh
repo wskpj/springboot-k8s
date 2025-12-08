@@ -15,6 +15,3 @@ kustomize build --enable-helm . | kubectl apply -f -
 
 echo "[4/4] Restarting Spring Boot Pods to apply new code..."
 kubectl rollout restart deployment springboot-app-stage
-
-echo "Deployment Triggered! Setting up Port-Forwarding..."
-exec "${WORK_DIR}/scripts/port-forward.stage.sh"
