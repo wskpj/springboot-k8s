@@ -52,6 +52,23 @@ mysql:
 
   secrets: {}
 
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: "7.0-alpine"
+  service:
+    port: 6379
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  existingConfigMap: "springboot-stage-config"
+  existingSecret: "springboot-stage-secret"
+
 ingress:
   enabled: true
   className: "nginx"
