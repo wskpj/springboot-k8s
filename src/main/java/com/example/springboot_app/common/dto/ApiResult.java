@@ -22,7 +22,7 @@ public class ApiResult<T> {
         return new ApiResult<>(true, data, null);
     }
 
-    public static <T> ApiResult<T> error(HttpError error) {
+    public static <T> ApiResult<T> fail(HttpError error) {
         return new ApiResult<>(false, null, error);
     }
 }

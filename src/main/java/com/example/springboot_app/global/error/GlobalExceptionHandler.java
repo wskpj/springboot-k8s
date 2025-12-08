@@ -5,7 +5,6 @@ import com.example.springboot_app.global.error.exception.BaseException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -32,7 +31,7 @@ public class GlobalExceptionHandler {
 
         HttpError httpError = HttpError.of(ErrorCode.INVALID_INPUT_VALUE, requestId, request.getRequestURI(), errors);
         return ResponseEntity.status(ErrorCode.INVALID_INPUT_VALUE.getStatus())
-                .body(ApiResult.error(httpError));
+                .body(ApiResult.fail(httpError));
     }
 
     // 비즈니스 로직 예외 (예상된 예외)
@@ -44,7 +43,7 @@ public class GlobalExceptionHandler {
 
         HttpError httpError = HttpError.of(e.getErrorCode(), requestId, request.getRequestURI(), e.getDetails());
         return ResponseEntity.status(e.getErrorCode().getStatus())
-                .body(ApiResult.error(httpError));
+                .body(ApiResult.fail(httpError));
     }
 
     // 기타 시스템 예외 (예상치 못한 예외)
@@ -56,6 +55,6 @@ public class GlobalExceptionHandler {
 
         HttpError httpError = HttpError.of(ErrorCode.INTERNAL_SERVER_ERROR, requestId, request.getRequestURI(), e.getMessage());
         return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())
-                .body(ApiResult.error(httpError));
+                .body(ApiResult.fail(httpError));
     }
 }
