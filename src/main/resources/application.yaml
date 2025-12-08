@@ -15,6 +15,11 @@ spring:
       maximum-pool-size: ${DB_CONN_MAXIMUM_POOL_SIZE}
       connection-timeout: ${DB_CONN_CONNECTION_TIMEOUT}
   
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+  
   h2:
     console:
       enabled: true
