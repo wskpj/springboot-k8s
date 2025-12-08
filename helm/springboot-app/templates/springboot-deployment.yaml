@@ -11,6 +11,10 @@ spec:
       {{- include "springboot-app.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8080"
       labels:
         {{- include "springboot-app.selectorLabels" . | nindent 8 }}
     spec:
