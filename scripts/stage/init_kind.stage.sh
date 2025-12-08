@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-readonly WORK_DIR=$(cd "$(dirname "$0")/.." && pwd)
+readonly WORK_DIR=$(cd "$(dirname "$0")/../.." && pwd)
 cd "${WORK_DIR}"
 
 # 1. Add NGINX Ingress Controller
