@@ -4,6 +4,7 @@ import com.example.springboot_app.domain.test.entity.Coupon;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -14,4 +15,8 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT c FROM Coupon c WHERE c.id = :id")
     Optional<Coupon> findByIdWithPessimisticLock(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE Coupon c SET c.stock = :stock WHERE c.id = :id")
+    void updateStock(@Param("id") Long id, @Param("stock") int stock);
 }

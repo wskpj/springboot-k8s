@@ -6,6 +6,7 @@ import com.example.springboot_app.domain.test.entity.Coupon;
 import com.example.springboot_app.domain.test.entity.UserCoupon;
 import com.example.springboot_app.domain.test.repository.CouponRepository;
 import com.example.springboot_app.domain.test.repository.UserCouponRepository;
+import com.example.springboot_app.global.service.RedisService;
 import com.example.springboot_app.domain.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +33,7 @@ public class LoadTestController {
     private final UserRepository userRepository;
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
+    private final RedisService redisService;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Operation(summary = "CPU 부하 테스트 (BCrypt 암호화)", description = "주어진 횟수만큼 BCrypt 암호화를 반복하여 서버 측 CPU 부하를 발생시키는 부하 테스트")
@@ -106,12 +108,22 @@ public class LoadTestController {
         return ApiResult.success("Burned DB via Reads. Iterations: " + iterations + ", Total Evaluated Count Iterations Sum: " + totalUsersScanned + ", Elapsed Time: " + elapsed + "ms");
     }
 
-    @Operation(summary = "쿠폰 재고 조회", description = "특정 쿠폰의 현재 재고 수량을 조회합니다.")
+    @Operation(summary = "쿠폰 재고 조회", description = "특정 쿠폰의 현재 재고 수량을 조회합니다. Redis를 먼저 확인하고 없으면 DB에서 로드합니다.")
     @GetMapping("/coupon/stock")
-    public ApiResult<Integer> getCouponStock(@RequestParam(defaultValue = "1") Long couponId) {
+    public ApiResult<Long> getCouponStock(@RequestParam(defaultValue = "1") Long couponId) {
+        String key = "coupon:" + couponId + ":stock";
+        Object stock = redisService.get(key);
+        
+        if (stock != null) {
+            return ApiResult.success(Long.valueOf(stock.toString()));
+        }
+
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new IllegalArgumentException("Coupon not found: id=" + couponId));
-        return ApiResult.success(coupon.getStock());
+        
+        // Redis에 캐싱
+        redisService.set(key, (long) coupon.getStock());
+        return ApiResult.success((long) coupon.getStock());
     }
 
     @Operation(summary = "DB 트랜잭션 부하 테스트 (쿠폰 발급 시나리오)", description = "JWT Decode, 쿠폰 재고 감소(Update) 및 발급 이력 기록(Insert)을 트랜잭션으로 처리하는 부하 시나리오")
@@ -173,5 +185,31 @@ public class LoadTestController {
                 "Lock contention test done. couponId=%d, holdMs=%d, totalElapsed=%d ms, remainingStock=%d",
                 couponId, holdMs, elapsed, coupon.getStock()
         ));
+    }
+
+    @Operation(summary = "Redis 원자적 트랜잭션 부하 테스트", description = "Redis DECR을 이용한 원자적 재고 감소 후 DB에 이력 기록")
+    @GetMapping("/db/transaction-redis")
+    public ApiResult<String> dbTransactionRedis(Principal principal, @RequestParam(defaultValue = "1") Long couponId) {
+        long start = System.currentTimeMillis();
+        String userEmail = principal.getName();
+        String key = "coupon:" + couponId + ":stock";
+
+        // 1. Redis에서 원자적으로 감소
+        Long remain = redisService.decrement(key);
+
+        if (remain == null || remain < 0) {
+            if (remain != null && remain < 0) {
+                redisService.increment(key);
+            }
+            throw new IllegalArgumentException("Out of stock or Redis not warmed up: couponId=" + couponId);
+        }
+
+        // 2. DB에는 발급 이력만 기록 (재고 차감은 Redis가 담당)
+        userCouponRepository.save(new UserCoupon(userEmail, couponId));
+
+        long elapsed = System.currentTimeMillis() - start;
+        log.info("Redis Atomic Transaction: email={}, couponId={}, remain={}, elapsed {} ms", userEmail, couponId, remain, elapsed);
+
+        return ApiResult.success("Success: Decreased stock in Redis & Saved UserCoupon in DB. Remain: " + remain);
     }
 }
