@@ -2,10 +2,10 @@ global:
   scrape_interval: 5s
 
 scrape_configs:
-  - job_name: 'springboot-app-stage'
+  - job_name: 'springboot-app'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['springboot-app-stage:8080']
+      - targets: ['springboot-app:8080']
 
   - job_name: 'kubernetes-pods'
     kubernetes_sd_configs:

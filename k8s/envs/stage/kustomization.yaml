@@ -1,0 +1,18 @@
+labels:
+  - pairs:
+      env: stage
+    includeSelectors: false
+
+resources:
+  - ../../base
+  - ../../monitoring
+
+configMapGenerator:
+  - name: global-env-config
+    envs:
+      - .env.stage
+
+secretGenerator:
+  - name: global-env-secret
+    envs:
+      - .secret.env.stage

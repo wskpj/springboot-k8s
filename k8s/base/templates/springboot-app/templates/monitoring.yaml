@@ -1,16 +1,14 @@
-{{- if .Values.monitoring.enabled }}
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: prometheus-stage-sa
+  name: {{ .Values.monitoring.prometheus.name }}-sa
   labels:
     {{- include "springboot-app.labels" . | nindent 4 }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: prometheus-stage-clusterrole
+  name: {{ .Values.monitoring.prometheus.name }}-clusterrole
 rules:
 - apiGroups: [""]
   resources:
@@ -30,40 +28,40 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: prometheus-stage-clusterrolebinding
+  name: {{ .Values.monitoring.prometheus.name }}-clusterrolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: prometheus-stage-clusterrole
+  name: {{ .Values.monitoring.prometheus.name }}-clusterrole
 subjects:
 - kind: ServiceAccount
-  name: prometheus-stage-sa
+  name: {{ .Values.monitoring.prometheus.name }}-sa
   namespace: default
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: prometheus-stage
+  name: {{ .Values.monitoring.prometheus.name }}
   labels:
     {{- include "springboot-app.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: prometheus-stage
+      app: {{ .Values.monitoring.prometheus.name }}
   template:
     metadata:
       labels:
-        app: prometheus-stage
+        app: {{ .Values.monitoring.prometheus.name }}
     spec:
-      serviceAccountName: prometheus-stage-sa
+      serviceAccountName: {{ .Values.monitoring.prometheus.name }}-sa
       containers:
-        - name: prometheus
+        - name: {{ .Values.monitoring.prometheus.name }}
           image: {{ .Values.monitoring.prometheus.image }}
           args:
             - "--config.file=/etc/prometheus/prometheus.yml"
           ports:
-            - containerPort: 9090
+            - containerPort: {{ .Values.monitoring.prometheus.service.port }}
           volumeMounts:
             - name: prometheus-config
               mountPath: /etc/prometheus/prometheus.yml
@@ -72,47 +70,42 @@ spec:
         - name: prometheus-config
           configMap:
             name: {{ .Values.monitoring.prometheus.existingConfigMap }}
-
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: prometheus-stage
+  name: {{ .Values.monitoring.prometheus.name }}
   labels:
     {{- include "springboot-app.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.monitoring.prometheus.service.type }}
+  type: ClusterIP
   selector:
-    app: prometheus-stage
+    app: {{ .Values.monitoring.prometheus.name }}
   ports:
     - port: {{ .Values.monitoring.prometheus.service.port }}
-      targetPort: 9090
-      {{- if and (eq .Values.monitoring.prometheus.service.type "NodePort") .Values.monitoring.prometheus.service.nodePort }}
-      nodePort: {{ .Values.monitoring.prometheus.service.nodePort }}
-      {{- end }}
-
+      targetPort: {{ .Values.monitoring.prometheus.service.port }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: grafana-stage
+  name: {{ .Values.monitoring.grafana.name }}
   labels:
     {{- include "springboot-app.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: grafana-stage
+      app: {{ .Values.monitoring.grafana.name }}
   template:
     metadata:
       labels:
-        app: grafana-stage
+        app: {{ .Values.monitoring.grafana.name }}
     spec:
       containers:
         - name: grafana
           image: {{ .Values.monitoring.grafana.image }}
           ports:
-            - containerPort: 3000
+            - containerPort: {{ .Values.monitoring.grafana.service.port }}
           volumeMounts:
             - name: grafana-datasource
               mountPath: /etc/grafana/provisioning/datasources/datasource.yml
@@ -135,19 +128,13 @@ spec:
           configMap:
             name: {{ .Values.monitoring.grafana.existingDashboardsConfigMap }}
         - name: grafana-data
-          {{- if .Values.monitoring.grafana.persistence.enabled }}
           persistentVolumeClaim:
-            claimName: grafana-stage-pvc
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
-
+            claimName: {{ .Values.monitoring.grafana.name }}-pvc
 ---
-{{- if .Values.monitoring.grafana.persistence.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: grafana-stage-pvc
+  name: {{ .Values.monitoring.grafana.name }}-pvc
   labels:
     {{- include "springboot-app.labels" . | nindent 4 }}
 spec:
@@ -155,27 +142,19 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.monitoring.grafana.persistence.size }}
-  {{- if .Values.monitoring.grafana.persistence.storageClassName }}
-  storageClassName: {{ .Values.monitoring.grafana.persistence.storageClassName }}
-  {{- end }}
-{{- end }}
-
+      storage: 1Gi
+  storageClassName: standard
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: grafana-stage
+  name: {{ .Values.monitoring.grafana.name }}
   labels:
     {{- include "springboot-app.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.monitoring.grafana.service.type }}
+  type: ClusterIP
   selector:
-    app: grafana-stage
+    app: {{ .Values.monitoring.grafana.name }}
   ports:
     - port: {{ .Values.monitoring.grafana.service.port }}
-      targetPort: 3000
-      {{- if and (eq .Values.monitoring.grafana.service.type "NodePort") .Values.monitoring.grafana.service.nodePort }}
-      nodePort: {{ .Values.monitoring.grafana.service.nodePort }}
-      {{- end }}
-{{- end }}
+      targetPort: {{ .Values.monitoring.grafana.service.port }}

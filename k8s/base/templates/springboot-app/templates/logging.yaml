@@ -1,25 +1,24 @@
-{{- if .Values.logging.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: loki-stage
+  name: {{ .Values.logging.loki.name }}
   labels:
     {{- include "springboot-app.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: loki-stage
+      app: {{ .Values.logging.loki.name }}
   template:
     metadata:
       labels:
-        app: loki-stage
+        app: {{ .Values.logging.loki.name }}
     spec:
       containers:
-        - name: loki
+        - name: {{ .Values.logging.loki.name }}
           image: {{ .Values.logging.loki.image }}
           ports:
-            - containerPort: 3100
+            - containerPort: {{ .Values.logging.loki.service.port }}
           env:
             - name: TZ
               value: Asia/Seoul
@@ -38,21 +37,21 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: loki-stage
+  name: {{ .Values.logging.loki.name }}
   labels:
     {{- include "springboot-app.labels" . | nindent 4 }}
 spec:
   ports:
     - port: {{ .Values.logging.loki.service.port }}
-      targetPort: 3100
+      targetPort: {{ .Values.logging.loki.service.port }}
   selector:
-    app: loki-stage
+    app: {{ .Values.logging.loki.name }}
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: promtail-clusterrole
+  name: {{ .Values.logging.promtail.name }}-clusterrole
 rules:
 - apiGroups: [""]
   resources: ["nodes", "nodes/proxy", "services", "endpoints", "pods"]
@@ -61,40 +60,40 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: promtail-serviceaccount
+  name: {{ .Values.logging.promtail.name }}-sa
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: promtail-clusterrolebinding
+  name: {{ .Values.logging.promtail.name }}-clusterrolebinding
 subjects:
   - kind: ServiceAccount
-    name: promtail-serviceaccount
+    name: {{ .Values.logging.promtail.name }}-sa
     namespace: default
 roleRef:
   kind: ClusterRole
-  name: promtail-clusterrole
+  name: {{ .Values.logging.promtail.name }}-clusterrole
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: promtail-stage
+  name: {{ .Values.logging.promtail.name }}
   labels:
     {{- include "springboot-app.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      app: promtail-stage
+      app: {{ .Values.logging.promtail.name }}
   template:
     metadata:
       labels:
-        app: promtail-stage
+        app: {{ .Values.logging.promtail.name }}
     spec:
-      serviceAccountName: promtail-serviceaccount
+      serviceAccountName: {{ .Values.logging.promtail.name }}-sa
       terminationGracePeriodSeconds: 30
       containers:
-        - name: promtail
+        - name: {{ .Values.logging.promtail.name }}
           image: {{ .Values.logging.promtail.image }}
           args:
             - -config.file=/etc/promtail/promtail.yaml
@@ -127,4 +126,3 @@ spec:
         - name: docker
           hostPath:
             path: /var/lib/docker/containers
-{{- end }}

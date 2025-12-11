@@ -1,0 +1,16 @@
+configMapGenerator:
+  - name: prometheus-config
+    files:
+      - prometheus.yml
+  - name: promtail-config
+    files:
+      - promtail.yaml=promtail.yml
+  - name: grafana-datasource
+    files:
+      - datasource.yml
+  - name: grafana-dashboard-provider
+    files:
+      - dashboards.yml=dashboard-provider.yml
+  - name: grafana-dashboards
+    files:
+      - dashboard.json=grafana-dashboard.json

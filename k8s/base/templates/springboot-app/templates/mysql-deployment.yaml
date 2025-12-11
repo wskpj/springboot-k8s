@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.mysql.name }}
+  labels:
+    {{- include "springboot-app.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.mysql.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.mysql.name }}
+    spec:
+      containers:
+        - name: {{ .Values.mysql.name }}
+          image: {{ .Values.mysql.image | quote }}
+          ports:
+            - containerPort: {{ .Values.mysql.service.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.global.existingConfigMap }}
+            - secretRef:
+                name: {{ .Values.global.existingSecret }}
+          volumeMounts:
+            - name: mysqldata
+              mountPath: /var/lib/mysql
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+      volumes:
+        - name: mysqldata
+          persistentVolumeClaim:
+            claimName: {{ .Values.mysql.name }}-pvc

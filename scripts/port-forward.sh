@@ -25,15 +25,15 @@ function forward_port() {
 }
 
 # MySQL (13306:3306)
-forward_port service/mysql-stage 13306:3306 &
+forward_port service/mysql 13306:3306 &
 # Prometheus (19090:9090)
-forward_port service/prometheus-stage 19090:9090 &
+forward_port service/prometheus 19090:9090 &
 # Grafana (13000:3000)
-forward_port service/grafana-stage 13000:3000 &
+forward_port service/grafana 13000:3000 &
 # Loki (13100:3100)
-forward_port service/loki-stage 13100:3100 &
+forward_port service/loki 13100:3100 &
 
-echo "------------------------------------------------"
+echo "------------------------------g------------------"
 echo "✅ Port-Forwarding is Active (Auto-Retry Enabled)"
 echo "👉 MySQL:      localhost:13306"
 echo "👉 Prometheus: http://localhost:19090"

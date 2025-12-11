@@ -1,0 +1,53 @@
+global:
+  existingConfigMap: "global-env-config"
+  existingSecret: "global-env-secret"
+
+application:
+  name: springboot-app
+  image: "springboot-app:latest"
+  service:
+    port: 8080
+  hpa:
+    minReplicas: 1
+    maxReplicas: 1
+    targetCPUUtilizationPercentage: 40
+    stabilizationWindowSeconds: 60
+
+mysql:
+  name: mysql
+  image: "mysql:8.0"
+  service:
+    port: 3306
+
+redis:
+  name: redis
+  image: "redis:7.0-alpine"
+  service:
+    port: 6379
+
+monitoring:
+  prometheus:
+    name: prometheus
+    image: "prom/prometheus:latest"
+    service:
+      port: 9090
+    existingConfigMap: "prometheus-config"
+  grafana:
+    name: grafana
+    image: "grafana/grafana:11.0.0"
+    service:
+      port: 3000
+    existingDatasourceConfigMap: "grafana-datasource"
+    existingDashboardProviderConfigMap: "grafana-dashboard-provider"
+    existingDashboardsConfigMap: "grafana-dashboards"
+
+logging:
+  loki:
+    name: loki
+    image: "grafana/loki:2.9.2"
+    service:
+      port: 3100
+  promtail:
+    name: promtail
+    image: "grafana/promtail:2.9.2"
+    existingConfigMap: "promtail-config"

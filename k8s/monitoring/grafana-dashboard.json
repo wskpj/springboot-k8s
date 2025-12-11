@@ -2167,8 +2167,8 @@
         "allValue": ".+",
         "current": {
           "selected": true,
-          "text": "springboot-app-stage",
-          "value": "springboot-app-stage"
+          "text": "springboot-app",
+          "value": "springboot-app"
         },
         "datasource": {
           "type": "prometheus",
@@ -2304,7 +2304,7 @@
           "type": "prometheus",
           "uid": "prometheusdatasource"
         },
-        "definition": "query_result(last_over_time(kube_pod_status_phase{phase=~\"${pod_status}\", pod=~\"mysql-stage.*\"}[1m]) == 1)",
+        "definition": "query_result(last_over_time(kube_pod_status_phase{phase=~\"${pod_status}\", pod=~\"mysql*\"}[1m]) == 1)",
         "hide": 0,
         "includeAll": true,
         "label": "MySQL Pod",
@@ -2312,7 +2312,7 @@
         "name": "mysql_pod",
         "options": [],
         "query": {
-          "query": "query_result(last_over_time(kube_pod_status_phase{phase=~\"${pod_status}\", pod=~\"mysql-stage.*\"}[1m]) == 1)",
+          "query": "query_result(last_over_time(kube_pod_status_phase{phase=~\"${pod_status}\", pod=~\"mysql*\"}[1m]) == 1)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -2336,7 +2336,7 @@
           "type": "prometheus",
           "uid": "prometheusdatasource"
         },
-        "definition": "query_result(last_over_time(kube_pod_status_phase{phase=~\"${pod_status}\", pod=~\"springboot-app-stage.*\"}[1m]) == 1)",
+        "definition": "query_result(last_over_time(kube_pod_status_phase{phase=~\"${pod_status}\", pod=~\"springboot-app*\"}[1m]) == 1)",
         "hide": 0,
         "includeAll": true,
         "label": "App Pod",
@@ -2344,7 +2344,7 @@
         "name": "app_pod",
         "options": [],
         "query": {
-          "query": "query_result(last_over_time(kube_pod_status_phase{phase=~\"${pod_status}\", pod=~\"springboot-app-stage.*\"}[1m]) == 1)",
+          "query": "query_result(last_over_time(kube_pod_status_phase{phase=~\"${pod_status}\", pod=~\"springboot-app*\"}[1m]) == 1)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,

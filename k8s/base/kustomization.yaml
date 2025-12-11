@@ -1,0 +1,6 @@
+helmGlobals:
+  chartHome: ./templates
+
+helmCharts:
+  - name: springboot-app
+    releaseName: springboot-app

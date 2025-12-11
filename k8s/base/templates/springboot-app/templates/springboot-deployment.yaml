@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "springboot-app.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.application.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
       {{- include "springboot-app.selectorLabels" . | nindent 6 }}
@@ -14,28 +14,33 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: "/actuator/prometheus"
-        prometheus.io/port: "8080"
+        prometheus.io/port: {{ .Values.application.service.port | quote }}
       labels:
         {{- include "springboot-app.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.application.image.repository }}:{{ .Values.application.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.application.image.pullPolicy }}
+        - name: {{ .Values.application.name }}
+          image: {{ .Values.application.image | quote }}
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: {{ .Values.application.service.port }}
               protocol: TCP
           envFrom:
             - configMapRef:
-                name: {{ .Values.application.existingConfigMap }}
+                name: {{ .Values.global.existingConfigMap }}
             - secretRef:
-                name: {{ .Values.application.existingSecret }}
+                name: {{ .Values.global.existingSecret }}
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-Xms512m -Xmx768m"
           resources:
-            {{- toYaml .Values.application.resources | nindent 12 }}
+            requests:
+              cpu: "100m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
           readinessProbe:
             httpGet:
               path: /actuator/health
