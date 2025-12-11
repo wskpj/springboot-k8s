@@ -68,4 +68,12 @@ public class RedisService {
     public Long decrement(String key, long delta) {
         return redisTemplate.opsForValue().increment(key, -delta);
     }
+
+    public void sAdd(String key, Object value) {
+        redisTemplate.opsForSet().add(key, value);
+    }
+
+    public java.util.Set<Object> sMembers(String key) {
+        return redisTemplate.opsForSet().members(key);
+    }
 }

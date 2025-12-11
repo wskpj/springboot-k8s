@@ -204,7 +204,10 @@ public class LoadTestController {
             throw new IllegalArgumentException("Out of stock or Redis not warmed up: couponId=" + couponId);
         }
 
-        // 2. DB에는 발급 이력만 기록 (재고 차감은 Redis가 담당)
+        // 2. 동기화 대기 목록(Set)에 추가
+        redisService.sAdd("coupon:sync:ids", couponId);
+
+        // 3. DB에는 발급 이력만 기록 (재고 차감은 Redis가 담당)
         userCouponRepository.save(new UserCoupon(userEmail, couponId));
 
         long elapsed = System.currentTimeMillis() - start;

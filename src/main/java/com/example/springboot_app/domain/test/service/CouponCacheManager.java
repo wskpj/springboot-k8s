@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 쿠폰 재고 캐싱 및 DB 동기화를 관리하는 매니저 레이어
@@ -22,6 +23,8 @@ public class CouponCacheManager {
 
     private final RedisService redisService;
     private final CouponRepository couponRepository;
+
+    private static final String SYNC_KEY = "coupon:sync:ids";
 
     /**
      * 서버 시작 시 DB의 재고 데이터를 Redis로 자동 웜업합니다.
@@ -42,25 +45,30 @@ public class CouponCacheManager {
     }
 
     /**
-     * 1초마다 Redis의 재고 데이터를 DB로 동기화합니다.
+     * 1초마다 Redis에서 변경이 발생한 쿠폰 ID들만 골라내어 DB로 동기화합니다.
      */
     @Scheduled(fixedDelay = 1000)
     @Transactional
     public void syncStockToDb() {
-        log.debug("[CouponCacheManager] Starting automatic Redis to DB stock synchronization...");
+        Set<Object> syncIds = redisService.sMembers(SYNC_KEY);
         
-        List<Coupon> coupons = couponRepository.findAll();
+        if (syncIds == null || syncIds.isEmpty()) {
+            return;
+        }
+
+        log.debug("[CouponCacheManager] Starting targeted sync for {} coupons...", syncIds.size());
         
-        for (Coupon coupon : coupons) {
-            String key = "coupon:" + coupon.getId() + ":stock";
+        redisService.delete(SYNC_KEY);
+        
+        for (Object idObj : syncIds) {
+            Long couponId = Long.valueOf(idObj.toString());
+            String key = "coupon:" + couponId + ":stock";
             Object redisStockObj = redisService.get(key);
             
             if (redisStockObj != null) {
                 Long redisStock = Long.valueOf(redisStockObj.toString());
-                if (redisStock.intValue() != coupon.getStock()) {
-                    log.info("[CouponCacheManager] Syncing coupon {}: Redis ({}) -> DB ({})", coupon.getId(), redisStock, coupon.getStock());
-                    couponRepository.updateStock(coupon.getId(), redisStock.intValue());
-                }
+                log.info("[CouponCacheManager] Targeted Sync: coupon {} -> stock {}", couponId, redisStock);
+                couponRepository.updateStock(couponId, redisStock.intValue());
             }
         }
     }
