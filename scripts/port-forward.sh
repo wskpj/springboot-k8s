@@ -26,6 +26,8 @@ function forward_port() {
 
 # MySQL (13306:3306)
 forward_port service/mysql 13306:3306 &
+# Redis (16379:6379)
+forward_port service/redis 16379:6379 &
 # Prometheus (19090:9090)
 forward_port service/prometheus 19090:9090 &
 # Grafana (13000:3000)
@@ -36,6 +38,7 @@ forward_port service/loki 13100:3100 &
 echo "------------------------------g------------------"
 echo "✅ Port-Forwarding is Active (Auto-Retry Enabled)"
 echo "👉 MySQL:      localhost:13306"
+echo "👉 Redis:      localhost:16379"
 echo "👉 Prometheus: http://localhost:19090"
 echo "👉 Grafana:    http://localhost:13000"
 echo "👉 Loki:       http://localhost:13100"
