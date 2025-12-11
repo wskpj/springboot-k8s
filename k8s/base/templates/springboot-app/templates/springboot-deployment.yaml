@@ -18,10 +18,14 @@ spec:
       labels:
         {{- include "springboot-app.selectorLabels" . | nindent 8 }}
     spec:
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:1.28
+          command: ['sh', '-c', "until nc -zv mysql 3306; do echo waiting for mysql; sleep 2; done;"]
       containers:
         - name: {{ .Values.application.name }}
           image: {{ .Values.application.image | quote }}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: {{ .Values.application.service.port }}
@@ -33,27 +37,27 @@ spec:
                 name: {{ .Values.global.existingSecret }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-Xms512m -Xmx768m"
+              value: "-Xms1024m -Xmx1536m"
           resources:
             requests:
-              cpu: "100m"
-              memory: "512Mi"
+              cpu: "2"
+              memory: "2Gi"
             limits:
-              cpu: "500m"
-              memory: "1Gi"
+              cpu: "2"
+              memory: "2Gi"
           readinessProbe:
             httpGet:
               path: /actuator/health
               port: http
-            initialDelaySeconds: 20
+            initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 10
+            failureThreshold: 5
           livenessProbe:
             httpGet:
               path: /actuator/health
               port: http
-            initialDelaySeconds: 30
+            initialDelaySeconds: 15
             periodSeconds: 15
             timeoutSeconds: 5
-            failureThreshold: 10
+            failureThreshold: 5
