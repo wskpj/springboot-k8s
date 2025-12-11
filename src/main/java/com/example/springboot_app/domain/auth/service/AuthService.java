@@ -14,8 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.example.springboot_app.global.service.RedisService;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +24,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
-    // Refresh Token Memory Storage (instead of Redis)
-    private final Map<String, String> refreshTokenStorage = new ConcurrentHashMap<>();
+    // Refresh Token storage using Redis
+    private final RedisService redisService;
 
     @Transactional
     public void signup(SignupRequest request) {
@@ -55,8 +54,9 @@ public class AuthService {
         String accessToken = jwtProvider.createAccessToken(user.getEmail());
         String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
 
-        // Save refresh token in memory
-        refreshTokenStorage.put(user.getEmail(), refreshToken);
+        // Save refresh token in Redis with TTL equal to token expiration
+        long ttl = jwtProvider.getExpirationRemainSeconds(refreshToken);
+        redisService.set("refresh:" + user.getEmail(), refreshToken, ttl);
 
         return new TokenDto(accessToken, refreshToken);
     }
@@ -73,7 +73,7 @@ public class AuthService {
     }
 
     public void logout(String email) {
-        refreshTokenStorage.remove(email);
+        redisService.delete("refresh:" + email);
     }
 
     public TokenDto refresh(String refreshToken) {
@@ -82,7 +82,7 @@ public class AuthService {
         }
 
         String email = jwtProvider.getEmailFromToken(refreshToken);
-        String savedToken = refreshTokenStorage.get(email);
+        String savedToken = (String) redisService.get("refresh:" + email);
 
         if (savedToken == null || !savedToken.equals(refreshToken)) {
             throw new BaseException(ErrorCode.INVALID_TOKEN);
@@ -92,7 +92,8 @@ public class AuthService {
         String newAccessToken = jwtProvider.createAccessToken(email);
         String newRefreshToken = jwtProvider.createRefreshToken(email);
 
-        refreshTokenStorage.put(email, newRefreshToken);
+        long newTtl = jwtProvider.getExpirationRemainSeconds(newRefreshToken);
+        redisService.set("refresh:" + email, newRefreshToken, newTtl);
 
         return new TokenDto(newAccessToken, newRefreshToken);
     }
