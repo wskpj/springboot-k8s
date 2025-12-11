@@ -3,7 +3,7 @@ FROM eclipse-temurin:21-jdk-alpine AS builder
 
 WORKDIR /builder
 
-# Gradle Wrapper 및 설정 파일 복사 (캐시 활용을 위해 먼저 복사)
+# Gradle Wrapper & 설정 파일 복사
 COPY gradlew .
 COPY build.gradle .
 COPY settings.gradle .
@@ -16,11 +16,15 @@ RUN chmod +x ./gradlew
 RUN --mount=type=cache,target=/root/.gradle \
     ./gradlew dependencies --no-daemon
 
-# 소스 코드 복사
-COPY src src
-
 # 실행 권한 부여
 RUN chmod +x ./gradlew
+
+# Gradle 바이너리 & 의존성 라이브러리 캐싱
+RUN --mount=type=cache,target=/root/.gradle \
+    ./gradlew --version && ./gradlew dependencies --no-daemon || true
+
+# 소스 코드 복사
+COPY src src
 
 # 프로젝트 빌드 (테스트 생략)
 RUN --mount=type=cache,target=/root/.gradle \
