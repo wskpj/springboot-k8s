@@ -10,9 +10,10 @@ kustomize build --enable-helm ./k8s/envs/stage | kubectl delete -f - --ignore-no
 echo "[2/4] Building Docker Image..."
 docker build -t springboot-app:latest .
 
-echo "[3/4] Loading Image to Kind Cluster..."
-kind load docker-image springboot-app:latest
+echo "[3/4] Tagging and Pushing to Registry..."
+docker tag springboot-app:latest localhost:5001/springboot-app:latest
+docker push localhost:5001/springboot-app:latest
 
-echo "[4/4] Applying K8s Manifests via Kustomize (ConfigMap, Secrets, Patches)..."
+echo "[4/4] Applying K8s Manifests via Kustomize..."
 kustomize build --enable-helm ./k8s/envs/stage | kubectl apply -f -
 

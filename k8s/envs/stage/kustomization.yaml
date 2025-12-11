@@ -16,3 +16,8 @@ secretGenerator:
   - name: global-env-secret
     envs:
       - .secret.env.stage
+
+images:
+  - name: springboot-app
+    newName: localhost:5001/springboot-app
+    newTag: latest
