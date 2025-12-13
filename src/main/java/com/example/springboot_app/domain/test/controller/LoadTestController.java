@@ -145,6 +145,7 @@ public class LoadTestController {
             throw new BusinessException(ErrorCode.OUT_OF_STOCK);
         }
         redisService.sAdd("coupon:sync:ids", couponId);
-        return ApiResult.success("Success: Decreased stock in Redis. Remain: " + remain);
+        // redisService.lPush("coupon:issuance:queue", userEmail + ":" + couponId);
+        return ApiResult.success("Success: Decreased stock in Redis and queued issuance. Remain: " + remain);
     }
 }

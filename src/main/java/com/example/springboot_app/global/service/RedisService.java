@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -75,5 +76,21 @@ public class RedisService {
 
     public java.util.Set<Object> sMembers(String key) {
         return redisTemplate.opsForSet().members(key);
+    }
+
+    public void lPush(String key, Object value) {
+        redisTemplate.opsForList().leftPush(key, value);
+    }
+
+    public Object rPop(String key) {
+        return redisTemplate.opsForList().rightPop(key);
+    }
+
+    public List<Object> lRange(String key, long start, long end) {
+        return redisTemplate.opsForList().range(key, start, end);
+    }
+
+    public void lTrim(String key, long start, long end) {
+        redisTemplate.opsForList().trim(key, start, end);
     }
 }
