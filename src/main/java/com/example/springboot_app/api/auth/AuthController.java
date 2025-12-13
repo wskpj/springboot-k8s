@@ -1,13 +1,13 @@
-package com.example.springboot_app.domain.auth.controller;
+package com.example.springboot_app.api.auth;
 
-import com.example.springboot_app.common.dto.ApiResult;
-import com.example.springboot_app.domain.auth.dto.AuthResponse;
-import com.example.springboot_app.domain.auth.dto.LoginRequest;
-import com.example.springboot_app.domain.auth.dto.SignupRequest;
+import com.example.springboot_app.api.auth.dto.AuthResponse;
+import com.example.springboot_app.api.auth.dto.LoginRequest;
+import com.example.springboot_app.api.auth.dto.SignupRequest;
+import com.example.springboot_app.api.auth.dto.UserInfoResponse;
+import com.example.springboot_app.api.common.dto.ApiResult;
 import com.example.springboot_app.domain.auth.dto.TokenDto;
 import com.example.springboot_app.domain.auth.service.AuthService;
-import com.example.springboot_app.domain.auth.dto.UserInfoResponse;
-import com.example.springboot_app.global.error.ErrorCode;
+import com.example.springboot_app.global.error.ErrorType;
 import com.example.springboot_app.global.error.exception.BaseException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -57,7 +57,7 @@ public class AuthController {
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @CookieValue(value = "refresh_token", required = false) String refreshToken) {
         if (principal == null) {
-            throw new BaseException(ErrorCode.UNAUTHORIZED);
+            throw new BaseException(ErrorType.UNAUTHORIZED);
         }
         String accessToken = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
         return ResponseEntity.ok(ApiResult.success(authService.getUserInfo(principal.getName(), accessToken, refreshToken)));
@@ -81,7 +81,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<ApiResult<AuthResponse>> refresh(@CookieValue(value = "refresh_token", required = false) String refreshToken, HttpServletResponse response) {
         if (refreshToken == null) {
-            throw new BaseException(ErrorCode.INVALID_TOKEN);
+            throw new BaseException(ErrorType.INVALID_TOKEN);
         }
 
         TokenDto tokenDto = authService.refresh(refreshToken);

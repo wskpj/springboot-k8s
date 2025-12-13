@@ -1,12 +1,12 @@
 package com.example.springboot_app.domain.auth.service;
 
-import com.example.springboot_app.domain.auth.dto.LoginRequest;
-import com.example.springboot_app.domain.auth.dto.SignupRequest;
+import com.example.springboot_app.api.auth.dto.LoginRequest;
+import com.example.springboot_app.api.auth.dto.SignupRequest;
+import com.example.springboot_app.api.auth.dto.UserInfoResponse;
 import com.example.springboot_app.domain.auth.dto.TokenDto;
-import com.example.springboot_app.domain.auth.dto.UserInfoResponse;
 import com.example.springboot_app.domain.user.entity.User;
 import com.example.springboot_app.domain.user.repository.UserRepository;
-import com.example.springboot_app.global.error.ErrorCode;
+import com.example.springboot_app.global.error.ErrorType;
 import com.example.springboot_app.global.error.exception.BaseException;
 import com.example.springboot_app.global.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class AuthService {
     @Transactional
     public void signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new BaseException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            throw new BaseException(ErrorType.EMAIL_ALREADY_EXISTS);
         }
 
         User user = User.builder()
@@ -45,10 +45,10 @@ public class AuthService {
     @Transactional(readOnly = true)
     public TokenDto login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BaseException(ErrorCode.INVALID_CREDENTIALS));
+                .orElseThrow(() -> new BaseException(ErrorType.INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new BaseException(ErrorCode.INVALID_CREDENTIALS);
+            throw new BaseException(ErrorType.INVALID_CREDENTIALS);
         }
 
         String accessToken = jwtProvider.createAccessToken(user.getEmail());
@@ -64,7 +64,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public UserInfoResponse getUserInfo(String email, String accessToken, String refreshToken) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new BaseException(ErrorType.USER_NOT_FOUND));
         
         long atExpiresIn = jwtProvider.getExpirationRemainSeconds(accessToken);
         long rtExpiresIn = jwtProvider.getExpirationRemainSeconds(refreshToken);
@@ -78,14 +78,14 @@ public class AuthService {
 
     public TokenDto refresh(String refreshToken) {
         if (refreshToken == null || !jwtProvider.validateToken(refreshToken)) {
-            throw new BaseException(ErrorCode.INVALID_TOKEN);
+            throw new BaseException(ErrorType.INVALID_TOKEN);
         }
 
         String email = jwtProvider.getEmailFromToken(refreshToken);
         String savedToken = (String) redisService.get("refresh:" + email);
 
         if (savedToken == null || !savedToken.equals(refreshToken)) {
-            throw new BaseException(ErrorCode.INVALID_TOKEN);
+            throw new BaseException(ErrorType.INVALID_TOKEN);
         }
 
         // Issue new tokens

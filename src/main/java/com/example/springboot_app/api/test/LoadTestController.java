@@ -1,7 +1,7 @@
-package com.example.springboot_app.domain.test.controller;
+package com.example.springboot_app.api.test;
 
-import com.example.springboot_app.common.dto.ApiResult;
 import com.example.springboot_app.domain.user.entity.User;
+import com.example.springboot_app.api.common.dto.ApiResult;
 import com.example.springboot_app.domain.test.entity.Coupon;
 import com.example.springboot_app.domain.test.entity.UserCoupon;
 import com.example.springboot_app.domain.test.repository.CouponRepository;
@@ -9,7 +9,7 @@ import com.example.springboot_app.domain.test.repository.UserCouponRepository;
 import com.example.springboot_app.global.service.RedisService;
 import com.example.springboot_app.domain.user.repository.UserRepository;
 import com.example.springboot_app.global.error.exception.BusinessException;
-import com.example.springboot_app.global.error.ErrorCode;
+import com.example.springboot_app.global.error.ErrorType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -98,7 +98,7 @@ public class LoadTestController {
             return ApiResult.success(Long.valueOf(stock.toString()));
         }
         Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COUPON_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorType.COUPON_NOT_FOUND));
         redisService.set(key, (long) coupon.getStock());
         return ApiResult.success((long) coupon.getStock());
     }
@@ -109,7 +109,7 @@ public class LoadTestController {
     public ApiResult<String> dbTransactionIntensive(Principal principal, @RequestParam(defaultValue = "1") Long couponId) {
         String userEmail = principal.getName();
         Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COUPON_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorType.COUPON_NOT_FOUND));
         coupon.decreaseStock();
         userCouponRepository.save(new UserCoupon(userEmail, couponId));
         return ApiResult.success("Burned DB via Transaction.");
@@ -125,7 +125,7 @@ public class LoadTestController {
     ) throws InterruptedException {
         String userEmail = principal.getName();
         Coupon coupon = couponRepository.findByIdWithPessimisticLock(couponId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COUPON_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorType.COUPON_NOT_FOUND));
         Thread.sleep(holdMs);
         coupon.decreaseStock();
         userCouponRepository.save(new UserCoupon(userEmail, couponId));
@@ -142,7 +142,7 @@ public class LoadTestController {
             if (remain != null && remain < 0) {
                 redisService.increment(key);
             }
-            throw new BusinessException(ErrorCode.OUT_OF_STOCK);
+            throw new BusinessException(ErrorType.OUT_OF_STOCK);
         }
         redisService.sAdd("coupon:sync:ids", couponId);
         // redisService.lPush("coupon:issuance:queue", userEmail + ":" + couponId);

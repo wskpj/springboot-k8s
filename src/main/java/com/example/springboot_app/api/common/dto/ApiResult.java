@@ -1,6 +1,5 @@
-package com.example.springboot_app.common.dto;
+package com.example.springboot_app.api.common.dto;
 
-import com.example.springboot_app.global.error.HttpError;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 
@@ -10,9 +9,9 @@ public class ApiResult<T> {
 
     private final boolean success;
     private final T data;
-    private final HttpError error;
+    private final ErrorResponse error;
 
-    private ApiResult(boolean success, T data, HttpError error) {
+    private ApiResult(boolean success, T data, ErrorResponse error) {
         this.success = success;
         this.data = data;
         this.error = error;
@@ -22,7 +21,7 @@ public class ApiResult<T> {
         return new ApiResult<>(true, data, null);
     }
 
-    public static <T> ApiResult<T> fail(HttpError error) {
+    public static <T> ApiResult<T> fail(ErrorResponse error) {
         return new ApiResult<>(false, null, error);
     }
 }

@@ -1,4 +1,4 @@
-package com.example.springboot_app.domain.auth.dto;
+package com.example.springboot_app.api.auth.dto;
 
 import com.example.springboot_app.domain.user.entity.User;
 import lombok.Getter;
