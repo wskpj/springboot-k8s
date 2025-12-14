@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -34,11 +36,13 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
         // 이미 ApiResult 형태인 경우 재래핑 방지
         if (body instanceof ApiResult) return body;
 
-        // ApiResult.success로 래핑
-        ApiResult<Object> result = ApiResult.success(body);
+        // RequestId 추출
+        String requestId = MDC.get("requestId");
 
-        // StringHttpMessageConverter는 String 외의 객체를 처리하지 못함
-        // 반환 타입이 String인 경우 JSON 문자열로 직접 변환하여 반환
+        // ApiResult.success로 래핑
+        ApiResult<Object> result = ApiResult.success(body, requestId);
+
+        // StringHttpMessageConverter 대응 (String 리턴 시 JSON으로 강제 변환)
         if (selectedConverterType.getName().contains("StringHttpMessageConverter")) {
             try {
                 response.getHeaders().setContentType(MediaType.APPLICATION_JSON);

@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ApiResult<Void>> createErrorResponse(ErrorType errorCode, HttpServletRequest request, Object details) {
         String requestId = Optional.ofNullable((String) request.getAttribute("requestId")).orElse(UUID.randomUUID().toString());
 
-        ErrorResponse httpError = ErrorResponse.of(errorCode, requestId, request.getRequestURI(), details);
-        return ResponseEntity.status(errorCode.getStatus()).body(ApiResult.fail(httpError));
+        ErrorResponse httpError = ErrorResponse.of(errorCode, request.getRequestURI(), details);
+        return ResponseEntity.status(errorCode.getStatus()).body(ApiResult.fail(httpError, requestId));
     }
 }
