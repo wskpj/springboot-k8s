@@ -1,11 +1,7 @@
 package com.example.springboot_app.global.util;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class JpaUtil {
 
@@ -17,27 +13,13 @@ public class JpaUtil {
             return pageable;
         }
 
-        List<Sort.Order> validOrders = new ArrayList<>();
         for (Sort.Order order : pageable.getSort()) {
-            if (checkFieldExists(entityClass, order.getProperty())) {
-                validOrders.add(order);
+            if (!checkFieldExists(entityClass, order.getProperty())) {
+                throw new IllegalArgumentException("No property '" + order.getProperty() + "' found for type '" + entityClass.getSimpleName() + "'");
             }
         }
 
-        // 유효한 정렬 조건이 하나도 없으면 id DESC로 기본 설정
-        if (validOrders.isEmpty()) {
-            return PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "id")
-            );
-        }
-
-        return PageRequest.of(
-            pageable.getPageNumber(),
-            pageable.getPageSize(),
-            Sort.by(validOrders)
-        );
+        return pageable;
     }
 
     /**

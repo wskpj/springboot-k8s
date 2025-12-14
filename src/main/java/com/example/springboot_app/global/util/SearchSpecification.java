@@ -34,6 +34,8 @@ public class SearchSpecification {
                         } else {
                             orPredicates.add(cb.like(cb.lower(root.get(field).as(String.class)), pattern.toLowerCase()));
                         }
+                    } else {
+                        throw new IllegalArgumentException("No property '" + field + "' found for type '" + root.getJavaType().getSimpleName() + "'");
                     }
                 }
                 
