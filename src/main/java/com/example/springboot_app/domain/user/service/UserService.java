@@ -3,6 +3,7 @@ package com.example.springboot_app.domain.user.service;
 import com.example.springboot_app.domain.common.dto.SearchParam;
 import com.example.springboot_app.domain.user.entity.User;
 import com.example.springboot_app.domain.user.repository.UserRepository;
+import com.example.springboot_app.global.util.JpaUtil;
 import com.example.springboot_app.global.util.SearchSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,6 @@ public class UserService {
     @Transactional(readOnly = true)
     public Page<User> searchUsers(SearchParam param) {
         Specification<User> spec = SearchSpecification.build(param);
-        return userRepository.findAll(spec, param.pageable());
+        return userRepository.findAll(spec, JpaUtil.validatePageable(param.pageable(), User.class));
     }
 }
