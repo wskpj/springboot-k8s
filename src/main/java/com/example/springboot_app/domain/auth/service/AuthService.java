@@ -1,9 +1,7 @@
 package com.example.springboot_app.domain.auth.service;
 
-import com.example.springboot_app.api.auth.dto.LoginRequest;
-import com.example.springboot_app.api.auth.dto.SignupRequest;
-import com.example.springboot_app.api.auth.dto.UserInfoResponse;
-import com.example.springboot_app.domain.auth.dto.TokenDto;
+import com.example.springboot_app.domain.auth.dto.AuthParam;
+import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.user.entity.User;
 import com.example.springboot_app.domain.user.repository.UserRepository;
 import com.example.springboot_app.global.error.ErrorType;
@@ -28,26 +26,26 @@ public class AuthService {
     private final RedisService redisService;
 
     @Transactional
-    public void signup(SignupRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+    public void signup(AuthParam.Signup param) {
+        if (userRepository.existsByEmail(param.email())) {
             throw new BaseException(ErrorType.EMAIL_ALREADY_EXISTS);
         }
 
         User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .name(request.getName())
+                .email(param.email())
+                .password(passwordEncoder.encode(param.password()))
+                .name(param.name())
                 .build();
 
         userRepository.save(user);
     }
 
     @Transactional(readOnly = true)
-    public TokenDto login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+    public AuthResult.Token login(AuthParam.Login param) {
+        User user = userRepository.findByEmail(param.email())
                 .orElseThrow(() -> new BaseException(ErrorType.INVALID_CREDENTIALS));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(param.password(), user.getPassword())) {
             throw new BaseException(ErrorType.INVALID_CREDENTIALS);
         }
 
@@ -58,25 +56,25 @@ public class AuthService {
         long ttl = jwtProvider.getExpirationRemainSeconds(refreshToken);
         redisService.set("refresh:" + user.getEmail(), refreshToken, ttl);
 
-        return new TokenDto(accessToken, refreshToken);
+        return new AuthResult.Token(accessToken, refreshToken);
     }
 
     @Transactional(readOnly = true)
-    public UserInfoResponse getUserInfo(String email, String accessToken, String refreshToken) {
+    public AuthResult.UserInfo getUserInfo(String email, String accessToken, String refreshToken) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BaseException(ErrorType.USER_NOT_FOUND));
         
         long atExpiresIn = jwtProvider.getExpirationRemainSeconds(accessToken);
         long rtExpiresIn = jwtProvider.getExpirationRemainSeconds(refreshToken);
         
-        return new UserInfoResponse(user, atExpiresIn, rtExpiresIn);
+        return new AuthResult.UserInfo(user, atExpiresIn, rtExpiresIn);
     }
 
     public void logout(String email) {
         redisService.delete("refresh:" + email);
     }
 
-    public TokenDto refresh(String refreshToken) {
+    public AuthResult.Token refresh(String refreshToken) {
         if (refreshToken == null || !jwtProvider.validateToken(refreshToken)) {
             throw new BaseException(ErrorType.INVALID_TOKEN);
         }
@@ -95,6 +93,6 @@ public class AuthService {
         long newTtl = jwtProvider.getExpirationRemainSeconds(newRefreshToken);
         redisService.set("refresh:" + email, newRefreshToken, newTtl);
 
-        return new TokenDto(newAccessToken, newRefreshToken);
+        return new AuthResult.Token(newAccessToken, newRefreshToken);
     }
 }

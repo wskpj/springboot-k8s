@@ -1,11 +1,9 @@
 package com.example.springboot_app.api.auth;
 
+import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
-import com.example.springboot_app.api.auth.dto.LoginRequest;
-import com.example.springboot_app.api.auth.dto.SignupRequest;
-import com.example.springboot_app.api.auth.dto.UserInfoResponse;
 import com.example.springboot_app.api.common.dto.ApiResult;
-import com.example.springboot_app.domain.auth.dto.TokenDto;
+import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.auth.service.AuthService;
 import com.example.springboot_app.global.error.ErrorType;
 import com.example.springboot_app.global.error.exception.BaseException;
@@ -31,28 +29,28 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResult<Void>> signup(@RequestBody @Valid SignupRequest request) {
-        authService.signup(request);
+    public ResponseEntity<ApiResult<Void>> signup(@RequestBody @Valid AuthRequest.Signup request) {
+        authService.signup(request.toParam());
         return ResponseEntity.ok(ApiResult.success(null));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResult<AuthResponse>> login(@RequestBody @Valid LoginRequest request, HttpServletResponse response) {
-        TokenDto tokenDto = authService.login(request);
+    public ResponseEntity<ApiResult<AuthResponse.Token>> login(@RequestBody @Valid AuthRequest.Login request, HttpServletResponse response) {
+        AuthResult.Token tokenDto = authService.login(request.toParam());
 
         // Set refresh token as http-only cookie
-        Cookie cookie = new Cookie("refresh_token", tokenDto.getRefreshToken());
+        Cookie cookie = new Cookie("refresh_token", tokenDto.refreshToken());
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
         // cookie.setSecure(true); // Enable this in production with HTTPS
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(ApiResult.success(new AuthResponse(tokenDto.getAccessToken())));
+        return ResponseEntity.ok(ApiResult.success(new AuthResponse.Token(tokenDto.accessToken())));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResult<UserInfoResponse>> getMe(
+    public ResponseEntity<ApiResult<AuthResponse.UserInfo>> getMe(
             Principal principal,
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @CookieValue(value = "refresh_token", required = false) String refreshToken) {
@@ -60,7 +58,8 @@ public class AuthController {
             throw new BaseException(ErrorType.UNAUTHORIZED);
         }
         String accessToken = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
-        return ResponseEntity.ok(ApiResult.success(authService.getUserInfo(principal.getName(), accessToken, refreshToken)));
+        AuthResponse.UserInfo userInfo = AuthResponse.UserInfo.fromResult(authService.getUserInfo(principal.getName(), accessToken, refreshToken));
+        return ResponseEntity.ok(ApiResult.success(userInfo));
     }
 
     @PostMapping("/logout")
@@ -79,20 +78,20 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResult<AuthResponse>> refresh(@CookieValue(value = "refresh_token", required = false) String refreshToken, HttpServletResponse response) {
+    public ResponseEntity<ApiResult<AuthResponse.Token>> refresh(@CookieValue(value = "refresh_token", required = false) String refreshToken, HttpServletResponse response) {
         if (refreshToken == null) {
             throw new BaseException(ErrorType.INVALID_TOKEN);
         }
 
-        TokenDto tokenDto = authService.refresh(refreshToken);
+        AuthResult.Token tokenDto = authService.refresh(refreshToken);
 
         // Set new refresh token
-        Cookie cookie = new Cookie("refresh_token", tokenDto.getRefreshToken());
+        Cookie cookie = new Cookie("refresh_token", tokenDto.refreshToken());
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(7 * 24 * 60 * 60); 
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(ApiResult.success(new AuthResponse(tokenDto.getAccessToken())));
+        return ResponseEntity.ok(ApiResult.success(new AuthResponse.Token(tokenDto.accessToken())));
     }
 }

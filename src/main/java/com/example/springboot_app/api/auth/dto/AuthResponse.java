@@ -1,11 +1,28 @@
 package com.example.springboot_app.api.auth.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.example.springboot_app.domain.auth.dto.AuthResult;
+import com.example.springboot_app.domain.user.entity.User;
 
-@Getter
-@AllArgsConstructor
 public class AuthResponse {
-    private String accessToken;
-    // Add other fields like user info if needed
+
+    public record Token(String accessToken) {}
+
+    public record UserInfo(
+        Long id,
+        String email,
+        String name,
+        Long accessTokenExpiresIn,
+        Long refreshTokenExpiresIn
+    ) {
+        public static UserInfo fromResult(AuthResult.UserInfo result) {
+            User user = result.user();
+            return new UserInfo(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                result.accessTokenExpiresIn(),
+                result.refreshTokenExpiresIn()
+            );
+        }
+    }
 }
