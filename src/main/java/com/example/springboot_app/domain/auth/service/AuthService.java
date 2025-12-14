@@ -4,7 +4,7 @@ import com.example.springboot_app.domain.auth.dto.AuthParam;
 import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.user.entity.User;
 import com.example.springboot_app.domain.user.repository.UserRepository;
-import com.example.springboot_app.global.error.ErrorType;
+import com.example.springboot_app.global.enums.ErrorType;
 import com.example.springboot_app.global.error.exception.BaseException;
 import com.example.springboot_app.global.security.JwtProvider;
 import lombok.RequiredArgsConstructor;

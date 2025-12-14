@@ -5,7 +5,7 @@ import com.example.springboot_app.global.error.exception.InfrastructureException
 import com.example.springboot_app.global.error.exception.SystemException;
 import com.example.springboot_app.api.common.dto.ApiResult;
 import com.example.springboot_app.api.common.dto.ErrorResponse;
-import com.example.springboot_app.global.error.ErrorType;
+import com.example.springboot_app.global.enums.ErrorType;
 import com.example.springboot_app.global.error.exception.BaseException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

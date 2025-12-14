@@ -1,6 +1,6 @@
 package com.example.springboot_app.global.error.exception;
 
-import com.example.springboot_app.global.error.ErrorType;
+import com.example.springboot_app.global.enums.ErrorType;
 
 /**
  * 일반적인 시스템 예외 (예: 예상치 못한 널 포인트 예외 등)

@@ -1,6 +1,6 @@
 package com.example.springboot_app.global.error.exception;
 
-import com.example.springboot_app.global.error.ErrorType;
+import com.example.springboot_app.global.enums.ErrorType;
 
 /**
  * 비즈니스 로직 수준의 예외 (예: 재고 부족, 권한 없음 등)

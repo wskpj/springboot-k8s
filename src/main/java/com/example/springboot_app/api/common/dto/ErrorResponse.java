@@ -3,7 +3,7 @@ package com.example.springboot_app.api.common.dto;
 import lombok.Builder;
 import lombok.Getter;
 
-import com.example.springboot_app.global.error.ErrorType;
+import com.example.springboot_app.global.enums.ErrorType;
 
 @Getter
 @Builder

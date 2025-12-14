@@ -1,6 +1,6 @@
 package com.example.springboot_app.global.error.exception;
 
-import com.example.springboot_app.global.error.ErrorType;
+import com.example.springboot_app.global.enums.ErrorType;
 import lombok.Getter;
 
 @Getter

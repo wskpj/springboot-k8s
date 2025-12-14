@@ -1,4 +1,4 @@
-package com.example.springboot_app.global.error;
+package com.example.springboot_app.global.enums;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

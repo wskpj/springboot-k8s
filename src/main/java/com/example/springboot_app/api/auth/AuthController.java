@@ -4,7 +4,7 @@ import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
 import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.auth.service.AuthService;
-import com.example.springboot_app.global.error.ErrorType;
+import com.example.springboot_app.global.enums.ErrorType;
 import com.example.springboot_app.global.error.exception.BaseException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

@@ -8,7 +8,7 @@ import com.example.springboot_app.domain.test.repository.UserCouponRepository;
 import com.example.springboot_app.global.service.RedisService;
 import com.example.springboot_app.domain.user.repository.UserRepository;
 import com.example.springboot_app.global.error.exception.BusinessException;
-import com.example.springboot_app.global.error.ErrorType;
+import com.example.springboot_app.global.enums.ErrorType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
