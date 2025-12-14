@@ -1,4 +1,4 @@
-package com.example.springboot_app.domain.common;
+package com.example.springboot_app.domain.common.entity;
 
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Version;

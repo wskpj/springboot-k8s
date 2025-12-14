@@ -1,7 +1,6 @@
 package com.example.springboot_app.domain.test.entity;
 
-import com.example.springboot_app.domain.common.BaseEntity;
-import com.example.springboot_app.domain.common.VersionedBaseEntity;
+import com.example.springboot_app.domain.common.entity.BaseEntity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
