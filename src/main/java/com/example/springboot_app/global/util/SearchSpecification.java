@@ -1,6 +1,8 @@
 package com.example.springboot_app.global.util;
 
 import com.example.springboot_app.domain.common.dto.SearchParam;
+import com.example.springboot_app.domain.common.enums.SearchType;
+
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -23,15 +25,9 @@ public class SearchSpecification {
             {
                 List<Predicate> orPredicates = new ArrayList<>();
                 
-                String pattern = switch (param.type()) {
-                    case "startsWith" -> param.q() + "%";
-                    case "endsWith" -> "%" + param.q();
-                    case "equals" -> param.q();
-                    default -> "%" + param.q() + "%";
-                };
-
+                String pattern = param.type().toPattern(param.q());
                 for (String field : param.fields()) {
-                    if ("equals".equals(param.type())) {
+                    if (param.type() == SearchType.EQUALS) {
                         orPredicates.add(cb.equal(root.get(field), param.q()));
                     } else {
                         orPredicates.add(cb.like(cb.lower(root.get(field).as(String.class)), pattern.toLowerCase()));

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import com.example.springboot_app.domain.common.dto.SearchParam;
+import com.example.springboot_app.domain.common.enums.SearchType;
 
 public record SearchRequest(
     Integer page,
@@ -43,6 +44,6 @@ public record SearchRequest(
             : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(dir, sortBy));
         
-        return new SearchParam(pageable, q, fields, type, filters, dateFrom, dateTo);
+        return new SearchParam(pageable, q, fields, SearchType.from(type), filters, dateFrom, dateTo);
     }
 }
