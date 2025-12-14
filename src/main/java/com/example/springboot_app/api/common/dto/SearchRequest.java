@@ -21,15 +21,27 @@ public record SearchRequest(
     String dateFrom,
     String dateTo
 ) {
+    private static final int PAGE_DEFAULT_SIZE = 10;
+    private static final int PAGE_MAX_SIZE = 100;
     
     /**
      * Compact Constructor: 기본값 설정 및 유효성 검증
      */
     public SearchRequest {
         if (page == null || page < 0) page = 0;
-        if (size == null || size <= 0) size = 10;
+        if (size == null || size <= 0) size = PAGE_DEFAULT_SIZE;
+        if (size > PAGE_MAX_SIZE) size = PAGE_MAX_SIZE;
+
         if (sortBy == null || sortBy.isBlank()) sortBy = "id";
-        if (direction == null || direction.isBlank()) direction = "DESC";
+        direction = "ASC".equalsIgnoreCase(direction) ? "ASC" : "DESC";
+
+        if (fields != null) {
+            fields = fields.stream()
+                    .map(f -> f.replaceAll("[\\[\\]\"']", "").trim())
+                    .filter(f -> !f.isBlank())
+                    .toList();
+        }
+
         if (type == null) type = "contains";
     }
 
