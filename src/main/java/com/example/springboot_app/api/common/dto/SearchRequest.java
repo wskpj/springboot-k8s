@@ -9,21 +9,39 @@ import org.springframework.data.domain.Sort;
 import com.example.springboot_app.domain.common.dto.SearchParam;
 import com.example.springboot_app.domain.common.enums.SearchType;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public record SearchRequest(
+    @Schema(description = "페이지 번호 (0부터 시작)", example = "0")
     Integer page,
+
+    @Schema(description = "페이지 크기 (기본 10)", example = "10")
     Integer size,
+
+    @Schema(description = "정렬 기준 필드", example = "createdAt")
     String sortBy,
+
+    @Schema(description = "정렬 방향 (ASC, DESC)", example = "DESC")
     String direction,
     
+    @Schema(description = "검색 쿼리", example = "example")
     String q,
+
+    @Schema(description = "검색 대상 필드 목록", example = "[\"name\", \"email\"]")
     List<String> fields,
+
+    @Schema(description = "검색 방식 (contains | equals | starts | ends)", example = "contains")
     String type,
+
+    @Schema(description = "시작 일시 (ISO_DATE_TIME)", example = "2020-01-01T00:00:00")
     String dateFrom,
+
+    @Schema(description = "종료 일시 (ISO_DATE_TIME)", example = "2029-12-31T23:59:59")
     String dateTo
 ) {
     private static final int PAGE_DEFAULT_SIZE = 10;
     private static final int PAGE_MAX_SIZE = 100;
-    
+
     /**
      * Compact Constructor: 기본값 설정 및 유효성 검증
      */
