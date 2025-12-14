@@ -1,7 +1,6 @@
 package com.example.springboot_app.api.test;
 
 import com.example.springboot_app.domain.user.entity.User;
-import com.example.springboot_app.api.common.dto.ApiResult;
 import com.example.springboot_app.domain.test.entity.Coupon;
 import com.example.springboot_app.domain.test.entity.UserCoupon;
 import com.example.springboot_app.domain.test.repository.CouponRepository;
@@ -40,32 +39,32 @@ public class LoadTestController {
 
     @Operation(summary = "CPU Stress (BCrypt)")
     @GetMapping("/cpu/bcrypt")
-    public ApiResult<String> cpuIntensiveBcrypt(@RequestParam(defaultValue = "10") int rounds) {
+    public String cpuIntensiveBcrypt(@RequestParam(defaultValue = "10") int rounds) {
         long start = System.currentTimeMillis();
         String result = "load-test-seed";
         for (int i = 0; i < rounds; i++) {
             result = encoder.encode(result);
         }
         long elapsed = System.currentTimeMillis() - start;
-        return ApiResult.success("Burned CPU using BCrypt. Elapsed: " + elapsed + "ms");
+        return "Burned CPU using BCrypt. Elapsed: " + elapsed + "ms";
     }
 
     @Operation(summary = "CPU Stress (Factorial)")
     @GetMapping("/cpu/factorial")
-    public ApiResult<String> cpuIntensiveFactorial(@RequestParam(defaultValue = "10000") int n) {
+    public String cpuIntensiveFactorial(@RequestParam(defaultValue = "10000") int n) {
         long start = System.currentTimeMillis();
         BigInteger result = BigInteger.ONE;
         for (int i = 2; i <= n; i++) {
             result = result.multiply(BigInteger.valueOf(i));
         }
         long elapsed = System.currentTimeMillis() - start;
-        return ApiResult.success("Burned CPU using Factorial. Elapsed: " + elapsed + "ms");
+        return "Burned CPU using Factorial. Elapsed: " + elapsed + "ms";
     }
 
     @Operation(summary = "DB Write Stress")
     @GetMapping("/db/write")
     @Transactional
-    public ApiResult<String> dbWriteIntensive(@RequestParam(defaultValue = "1") int count) {
+    public String dbWriteIntensive(@RequestParam(defaultValue = "1") int count) {
         for (int i = 0; i < count; i++) {
             String uuid = UUID.randomUUID().toString();
             User dummyUser = User.builder()
@@ -75,50 +74,50 @@ public class LoadTestController {
                     .build();
             userRepository.save(dummyUser);
         }
-        return ApiResult.success("Burned DB via Writes.");
+        return "Burned DB via Writes.";
     }
 
     @Operation(summary = "DB Read Stress")
     @GetMapping("/db/read")
     @Transactional(readOnly = true)
-    public ApiResult<String> dbReadIntensive(@RequestParam(defaultValue = "1") int iterations) {
+    public String dbReadIntensive(@RequestParam(defaultValue = "1") int iterations) {
         long totalUsersScanned = 0;
         for (int i = 0; i < iterations; i++) {
             totalUsersScanned += userRepository.count();
         }
-        return ApiResult.success("Burned DB via Reads. Total: " + totalUsersScanned);
+        return "Burned DB via Reads. Total: " + totalUsersScanned;
     }
 
     @Operation(summary = "Get Coupon Stock")
     @GetMapping("/coupon/stock")
-    public ApiResult<Long> getCouponStock(@RequestParam(defaultValue = "1") Long couponId) {
+    public Long getCouponStock(@RequestParam(defaultValue = "1") Long couponId) {
         String key = "coupon:" + couponId + ":stock";
         Object stock = redisService.get(key);
         if (stock != null) {
-            return ApiResult.success(Long.valueOf(stock.toString()));
+            return Long.valueOf(stock.toString());
         }
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new BusinessException(ErrorType.COUPON_NOT_FOUND));
         redisService.set(key, (long) coupon.getStock());
-        return ApiResult.success((long) coupon.getStock());
+        return (long) coupon.getStock();
     }
 
     @Operation(summary = "DB Transaction Stress")
     @GetMapping("/db/transaction")
     @Transactional
-    public ApiResult<String> dbTransactionIntensive(Principal principal, @RequestParam(defaultValue = "1") Long couponId) {
+    public String dbTransactionIntensive(Principal principal, @RequestParam(defaultValue = "1") Long couponId) {
         String userEmail = principal.getName();
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new BusinessException(ErrorType.COUPON_NOT_FOUND));
         coupon.decreaseStock();
         userCouponRepository.save(new UserCoupon(userEmail, couponId));
-        return ApiResult.success("Burned DB via Transaction.");
+        return "Burned DB via Transaction.";
     }
 
     @Operation(summary = "DB Lock Contention Stress")
     @GetMapping("/db/lock-contention")
     @Transactional
-    public ApiResult<String> dbLockContention(
+    public String dbLockContention(
             Principal principal,
             @RequestParam(defaultValue = "1") Long couponId,
             @RequestParam(defaultValue = "0") long holdMs
@@ -129,12 +128,12 @@ public class LoadTestController {
         Thread.sleep(holdMs);
         coupon.decreaseStock();
         userCouponRepository.save(new UserCoupon(userEmail, couponId));
-        return ApiResult.success("Lock contention test done.");
+        return "Lock contention test done.";
     }
 
     @Operation(summary = "Redis Atomic Transaction Stress")
     @GetMapping("/db/transaction-redis")
-    public ApiResult<String> dbTransactionRedis(Principal principal, @RequestParam(defaultValue = "1") Long couponId) {
+    public String dbTransactionRedis(Principal principal, @RequestParam(defaultValue = "1") Long couponId) {
         String userEmail = principal.getName();
         String key = "coupon:" + couponId + ":stock";
         Long remain = redisService.decrement(key);
@@ -146,6 +145,6 @@ public class LoadTestController {
         }
         redisService.sAdd("coupon:sync:ids", couponId);
         // redisService.lPush("coupon:issuance:queue", userEmail + ":" + couponId);
-        return ApiResult.success("Success: Decreased stock in Redis and queued issuance. Remain: " + remain);
+        return "Success: Decreased stock in Redis and queued issuance. Remain: " + remain;
     }
 }

@@ -14,7 +14,7 @@ public class AuthResponse {
         Long accessTokenExpiresIn,
         Long refreshTokenExpiresIn
     ) {
-        public static UserInfo fromResult(AuthResult.UserInfo result) {
+        public static UserInfo from(AuthResult.UserInfo result) {
             User user = result.user();
             return new UserInfo(
                 user.getId(),

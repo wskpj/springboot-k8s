@@ -2,7 +2,6 @@ package com.example.springboot_app.api.auth;
 
 import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
-import com.example.springboot_app.api.common.dto.ApiResult;
 import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.auth.service.AuthService;
 import com.example.springboot_app.global.error.ErrorType;
@@ -11,7 +10,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,13 +27,12 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResult<Void>> signup(@RequestBody @Valid AuthRequest.Signup request) {
+    public void signup(@RequestBody @Valid AuthRequest.Signup request) {
         authService.signup(request.toParam());
-        return ResponseEntity.ok(ApiResult.success(null));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResult<AuthResponse.Token>> login(@RequestBody @Valid AuthRequest.Login request, HttpServletResponse response) {
+    public AuthResponse.Token login(@RequestBody @Valid AuthRequest.Login request, HttpServletResponse response) {
         AuthResult.Token tokenDto = authService.login(request.toParam());
 
         // Set refresh token as http-only cookie
@@ -43,14 +40,13 @@ public class AuthController {
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
-        // cookie.setSecure(true); // Enable this in production with HTTPS
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(ApiResult.success(new AuthResponse.Token(tokenDto.accessToken())));
+        return new AuthResponse.Token(tokenDto.accessToken());
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResult<AuthResponse.UserInfo>> getMe(
+    public AuthResponse.UserInfo getMe(
             Principal principal,
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @CookieValue(value = "refresh_token", required = false) String refreshToken) {
@@ -58,12 +54,11 @@ public class AuthController {
             throw new BaseException(ErrorType.UNAUTHORIZED);
         }
         String accessToken = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
-        AuthResponse.UserInfo userInfo = AuthResponse.UserInfo.fromResult(authService.getUserInfo(principal.getName(), accessToken, refreshToken));
-        return ResponseEntity.ok(ApiResult.success(userInfo));
+        return AuthResponse.UserInfo.from(authService.getUserInfo(principal.getName(), accessToken, refreshToken));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResult<Void>> logout(Principal principal, HttpServletResponse response) {
+    public void logout(Principal principal, HttpServletResponse response) {
         if (principal != null) {
             authService.logout(principal.getName());
         }
@@ -73,12 +68,10 @@ public class AuthController {
         cookie.setMaxAge(0);
         cookie.setPath("/");
         response.addCookie(cookie);
-
-        return ResponseEntity.ok(ApiResult.success(null));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResult<AuthResponse.Token>> refresh(@CookieValue(value = "refresh_token", required = false) String refreshToken, HttpServletResponse response) {
+    public AuthResponse.Token refresh(@CookieValue(value = "refresh_token", required = false) String refreshToken, HttpServletResponse response) {
         if (refreshToken == null) {
             throw new BaseException(ErrorType.INVALID_TOKEN);
         }
@@ -92,6 +85,6 @@ public class AuthController {
         cookie.setMaxAge(7 * 24 * 60 * 60); 
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(ApiResult.success(new AuthResponse.Token(tokenDto.accessToken())));
+        return new AuthResponse.Token(tokenDto.accessToken());
     }
 }
