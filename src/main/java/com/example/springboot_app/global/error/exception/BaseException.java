@@ -4,7 +4,7 @@ import com.example.springboot_app.global.enums.ErrorType;
 import lombok.Getter;
 
 @Getter
-public class BaseException extends RuntimeException {
+public abstract class BaseException extends RuntimeException {
     private final ErrorType errorCode;
     private final Object details;
 

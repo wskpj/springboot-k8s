@@ -1,19 +1,21 @@
 package com.example.springboot_app.api.auth;
 
+import java.security.Principal;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
 import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.auth.service.AuthService;
 import com.example.springboot_app.global.enums.ErrorType;
-import com.example.springboot_app.global.error.exception.BaseException;
+import com.example.springboot_app.global.error.exception.BusinessException;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-import java.security.Principal;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,7 +46,7 @@ public class AuthController implements AuthApi {
     @Override
     public AuthResponse.UserInfo getMe(Principal principal, String authHeader, String refreshToken) {
         if (principal == null) {
-            throw new BaseException(ErrorType.UNAUTHORIZED);
+            throw new BusinessException(ErrorType.UNAUTHORIZED);
         }
         String accessToken = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
         return AuthResponse.UserInfo.from(authService.getUserInfo(principal.getName(), accessToken, refreshToken));
@@ -66,7 +68,7 @@ public class AuthController implements AuthApi {
     @Override
     public AuthResponse.Token refresh(String refreshToken, HttpServletResponse response) {
         if (refreshToken == null) {
-            throw new BaseException(ErrorType.INVALID_TOKEN);
+            throw new BusinessException(ErrorType.INVALID_TOKEN);
         }
 
         AuthResult.Token tokenDto = authService.refresh(refreshToken);
