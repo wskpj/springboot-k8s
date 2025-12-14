@@ -47,15 +47,6 @@ public class SearchSpecification {
                 predicates.add(cb.lessThanOrEqualTo(root.get(dateField), end));
             }
 
-            // 3. 추가 필터 (filters)
-            if (param.filters() != null) {
-                param.filters().forEach((key, value) -> {
-                    if (value != null) {
-                        predicates.add(cb.equal(root.get(key), value));
-                    }
-                });
-            }
-
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

@@ -1,7 +1,6 @@
 package com.example.springboot_app.api.common.dto;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +18,6 @@ public record SearchRequest(
     String q,
     List<String> fields,
     String type,
-    Map<String, Object> filters,
     String dateFrom,
     String dateTo
 ) {
@@ -44,6 +42,6 @@ public record SearchRequest(
             : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(dir, sortBy));
         
-        return new SearchParam(pageable, q, fields, SearchType.from(type), filters, dateFrom, dateTo);
+        return new SearchParam(pageable, q, fields, SearchType.from(type), dateFrom, dateTo);
     }
 }
