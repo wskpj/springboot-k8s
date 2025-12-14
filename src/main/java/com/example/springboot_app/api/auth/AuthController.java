@@ -8,31 +8,27 @@ import com.example.springboot_app.global.error.ErrorType;
 import com.example.springboot_app.global.error.exception.BaseException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import java.security.Principal;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import java.security.Principal;
 
 @RestController
-@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthApi {
 
     private final AuthService authService;
 
-    @PostMapping("/signup")
-    public void signup(@RequestBody @Valid AuthRequest.Signup request) {
+    @Override
+    @ResponseStatus(HttpStatus.CREATED)
+    public void signup(AuthRequest.Signup request) {
         authService.signup(request.toParam());
     }
 
-    @PostMapping("/login")
-    public AuthResponse.Token login(@RequestBody @Valid AuthRequest.Login request, HttpServletResponse response) {
+    @Override
+    public AuthResponse.Token login(AuthRequest.Login request, HttpServletResponse response) {
         AuthResult.Token tokenDto = authService.login(request.toParam());
 
         // Set refresh token as http-only cookie
@@ -45,11 +41,8 @@ public class AuthController {
         return new AuthResponse.Token(tokenDto.accessToken());
     }
 
-    @GetMapping("/me")
-    public AuthResponse.UserInfo getMe(
-            Principal principal,
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @CookieValue(value = "refresh_token", required = false) String refreshToken) {
+    @Override
+    public AuthResponse.UserInfo getMe(Principal principal, String authHeader, String refreshToken) {
         if (principal == null) {
             throw new BaseException(ErrorType.UNAUTHORIZED);
         }
@@ -57,7 +50,7 @@ public class AuthController {
         return AuthResponse.UserInfo.from(authService.getUserInfo(principal.getName(), accessToken, refreshToken));
     }
 
-    @PostMapping("/logout")
+    @Override
     public void logout(Principal principal, HttpServletResponse response) {
         if (principal != null) {
             authService.logout(principal.getName());
@@ -70,8 +63,8 @@ public class AuthController {
         response.addCookie(cookie);
     }
 
-    @PostMapping("/refresh")
-    public AuthResponse.Token refresh(@CookieValue(value = "refresh_token", required = false) String refreshToken, HttpServletResponse response) {
+    @Override
+    public AuthResponse.Token refresh(String refreshToken, HttpServletResponse response) {
         if (refreshToken == null) {
             throw new BaseException(ErrorType.INVALID_TOKEN);
         }
