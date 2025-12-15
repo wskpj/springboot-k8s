@@ -44,8 +44,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/signup", "/api/v1/auth/login").permitAll()
-                        .requestMatchers("/api/v1/stress/db/**").authenticated()
-                        .requestMatchers("/api/v1/stress/**").permitAll()
+                        .requestMatchers("/api/v1/coupons/**").authenticated()
                         .requestMatchers("/api/v1/users/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()

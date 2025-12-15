@@ -1,18 +1,16 @@
-CREATE TABLE coupon (
+CREATE TABLE coupons (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    stock INT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
+    title VARCHAR(255) NOT NULL,
+    total_quantity INT NOT NULL,
+    remaining_quantity INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE user_coupon (
+CREATE TABLE user_coupons (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_email VARCHAR(255) NOT NULL,
+    user_id BIGINT NOT NULL,
     coupon_id BIGINT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
--- 테스트용 쿠폰 데이터 1개 주입 (재고 1,000,000으로 충분히 생성)
-INSERT INTO coupon (name, stock, created_at, updated_at) VALUES ('Welcome Coupon', 1000000, NOW(), NOW());

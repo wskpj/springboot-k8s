@@ -1,11 +1,13 @@
 package com.example.springboot_app.global.service;
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -74,8 +76,12 @@ public class RedisService {
         redisTemplate.opsForSet().add(key, value);
     }
 
-    public java.util.Set<Object> sMembers(String key) {
+    public Set<Object> sMembers(String key) {
         return redisTemplate.opsForSet().members(key);
+    }
+
+    public Boolean sIsMember(String key, Object value) {
+        return redisTemplate.opsForSet().isMember(key, value);
     }
 
     public void lPush(String key, Object value) {
