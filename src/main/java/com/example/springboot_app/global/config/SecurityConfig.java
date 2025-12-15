@@ -23,6 +23,8 @@ import com.example.springboot_app.domain.auth.annotations.AuthPublic;
 import com.example.springboot_app.global.resolver.AuthAnnotationResolver;
 import com.example.springboot_app.global.security.JwtAuthenticationFilter;
 import com.example.springboot_app.global.security.JwtProvider;
+import com.example.springboot_app.global.security.handler.CustomAccessDeniedHandler;
+import com.example.springboot_app.global.security.handler.CustomAuthenticationEntryPoint;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +35,8 @@ public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
     private final AuthAnnotationResolver authResolver;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -57,6 +61,10 @@ public class SecurityConfig {
                     .requestMatchers(request -> authResolver.hasAnnotation(request, AuthAdmin.class)).hasRole("ADMIN")
                     .requestMatchers(request -> authResolver.hasAnnotation(request, AuthPublic.class)).permitAll()
                     .anyRequest().authenticated()
+            )
+            .exceptionHandling(exception -> exception
+                    .authenticationEntryPoint(authenticationEntryPoint)
+                    .accessDeniedHandler(accessDeniedHandler)
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 

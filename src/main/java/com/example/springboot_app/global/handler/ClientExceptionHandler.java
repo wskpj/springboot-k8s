@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.example.springboot_app.api.common.dto.ApiResult;
 import com.example.springboot_app.global.enums.ErrorType;
+import com.example.springboot_app.global.enums.GlobalError;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class ClientExceptionHandler extends BaseExceptionHandler {
                 .map(error -> new FieldErrorDetail(error.getField(), error.getDefaultMessage()))
                 .toList();
 
-        return responseError(ErrorType.INVALID_INPUT_VALUE, request.getRequestURI(), details);
+        return responseError(GlobalError.BAD_REQUEST, request.getRequestURI(), details);
     }
 
     /**
@@ -45,7 +46,7 @@ public class ClientExceptionHandler extends BaseExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     private ResponseEntity<ApiResult<Void>> handleIllegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
         log.info("Illegal Argument Exception: {}", e.getMessage());
-        return responseError(ErrorType.INVALID_INPUT_VALUE, request.getRequestURI(), e.getMessage());
+        return responseError(GlobalError.BAD_REQUEST, request.getRequestURI(), e.getMessage());
     }
 
     /**
@@ -54,6 +55,6 @@ public class ClientExceptionHandler extends BaseExceptionHandler {
     @ExceptionHandler(PropertyReferenceException.class)
     private ResponseEntity<ApiResult<Void>> handlePropertyReferenceException(PropertyReferenceException e, HttpServletRequest request) {
         log.info("Property Reference Exception: {}", e.getMessage());
-        return responseError(ErrorType.INVALID_INPUT_VALUE, request.getRequestURI(), e.getMessage());
+        return responseError(GlobalError.BAD_REQUEST, request.getRequestURI(), e.getMessage());
     }
 }
