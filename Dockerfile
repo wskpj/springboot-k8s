@@ -21,14 +21,14 @@ RUN chmod +x ./gradlew
 
 # Gradle 바이너리 & 의존성 라이브러리 캐싱
 RUN --mount=type=cache,target=/root/.gradle \
-    ./gradlew --version && ./gradlew dependencies --no-daemon || true
+    ./gradlew dependencies --no-daemon
 
 # 소스 코드 복사
 COPY src src
 
 # 프로젝트 빌드 (테스트 생략)
 RUN --mount=type=cache,target=/root/.gradle \
-    ./gradlew bootJar -x test --no-daemon
+    ./gradlew bootJar -x test --no-daemon --build-cache
 
 # 레이어 추출
 # 생성된 JAR 파일을 4개의 계층으로 분리
