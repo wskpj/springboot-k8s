@@ -8,7 +8,7 @@ import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
 import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.auth.service.AuthService;
-import com.example.springboot_app.global.enums.ErrorType;
+import com.example.springboot_app.global.enums.BusinessError;
 import com.example.springboot_app.global.error.exception.BusinessException;
 import com.example.springboot_app.global.security.AuthUser;
 
@@ -44,9 +44,6 @@ public class AuthController implements AuthApi {
 
     @Override
     public AuthResponse.UserInfo getMe(AuthUser user, String authHeader, String refreshToken) {
-        if (user == null) {
-            throw new BusinessException(ErrorType.UNAUTHORIZED);
-        }
         String accessToken = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
         return AuthResponse.UserInfo.from(authService.getUserInfo(user.getEmail(), accessToken, refreshToken));
     }
@@ -67,7 +64,7 @@ public class AuthController implements AuthApi {
     @Override
     public AuthResponse.Token refresh(String refreshToken, HttpServletResponse response) {
         if (refreshToken == null) {
-            throw new BusinessException(ErrorType.INVALID_TOKEN);
+            throw new BusinessException(BusinessError.INVALID_TOKEN);
         }
 
         AuthResult.Token tokenDto = authService.refresh(refreshToken);

@@ -1,7 +1,7 @@
 package com.example.springboot_app.domain.coupon.entity;
 
 import com.example.springboot_app.domain.common.entity.BaseEntity;
-import com.example.springboot_app.global.enums.ErrorType;
+import com.example.springboot_app.global.enums.BusinessError;
 import com.example.springboot_app.global.error.exception.BusinessException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -42,7 +42,7 @@ public class Coupon extends BaseEntity {
      */
     public void validateIssuance() {
         if (remainingQuantity <= 0) {
-            throw new BusinessException(ErrorType.OUT_OF_STOCK);
+            throw new BusinessException(BusinessError.OUT_OF_STOCK);
         }
     }
 
@@ -51,7 +51,7 @@ public class Coupon extends BaseEntity {
      */
     public void decreaseRemainingQuantity() {
         if (this.remainingQuantity <= 0) {
-            throw new BusinessException(ErrorType.OUT_OF_STOCK);
+            throw new BusinessException(BusinessError.OUT_OF_STOCK);
         }
         this.remainingQuantity--;
     }

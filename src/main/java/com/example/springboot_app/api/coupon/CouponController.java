@@ -6,7 +6,7 @@ import com.example.springboot_app.api.coupon.dto.CouponResponse;
 import com.example.springboot_app.domain.coupon.entity.Coupon;
 import com.example.springboot_app.domain.coupon.repository.CouponRepository;
 import com.example.springboot_app.domain.coupon.service.CouponService;
-import com.example.springboot_app.global.enums.ErrorType;
+import com.example.springboot_app.global.enums.BusinessError;
 import com.example.springboot_app.global.error.exception.BusinessException;
 import com.example.springboot_app.global.security.AuthUser;
 
@@ -21,16 +21,13 @@ public class CouponController implements CouponApi {
 
     @Override
     public void issueCoupon(Long id, AuthUser user) {
-        if (user == null) {
-            throw new BusinessException(ErrorType.UNAUTHORIZED);
-        }
         couponService.issueCoupon(id, user.getEmail());
     }
 
     @Override
     public CouponResponse.Stock getStock(Long id) {
         Coupon coupon = couponRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorType.COUPON_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(BusinessError.COUPON_NOT_FOUND));
         return new CouponResponse.Stock(coupon.getId(), coupon.getRemainingQuantity());
     }
 }

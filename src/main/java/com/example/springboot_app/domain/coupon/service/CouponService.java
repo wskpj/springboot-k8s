@@ -1,13 +1,12 @@
 package com.example.springboot_app.domain.coupon.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.example.springboot_app.domain.coupon.entity.Coupon;
 import com.example.springboot_app.domain.coupon.repository.CouponRepository;
 import com.example.springboot_app.domain.user.entity.User;
 import com.example.springboot_app.domain.user.repository.UserRepository;
-import com.example.springboot_app.global.enums.ErrorType;
+import com.example.springboot_app.global.enums.BusinessError;
 import com.example.springboot_app.global.error.exception.BusinessException;
 import com.example.springboot_app.global.service.RedisService;
 
@@ -34,12 +33,12 @@ public class CouponService {
     public void issueCoupon(Long couponId, String email) {
         // 1. 유저 확인
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorType.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(BusinessError.USER_NOT_FOUND));
 
         // 2. 중복 발급 체크 (Redis Set 활용)
         String userSetKey = String.format(COUPON_ISSUED_USERS_KEY, couponId);
         if (redisService.sIsMember(userSetKey, user.getId().toString())) {
-            throw new BusinessException(ErrorType.ALREADY_ISSUED);
+            throw new BusinessException(BusinessError.ALREADY_ISSUED);
         }
 
         // 3. 재고 차감 (Redis Atomic DECR)
@@ -51,7 +50,7 @@ public class CouponService {
         Long remain = redisService.decrement(stockKey);
         if (remain < 0) {
             redisService.increment(stockKey); // 차감 취소 (복구)
-            throw new BusinessException(ErrorType.OUT_OF_STOCK);
+            throw new BusinessException(BusinessError.OUT_OF_STOCK);
         }
 
         // 4. 발급 처리 (비동기 동기화 큐잉)
@@ -65,7 +64,7 @@ public class CouponService {
     private void ensureStockLoaded(Long couponId, String stockKey) {
         if (redisService.get(stockKey) == null) {
             Coupon coupon = couponRepository.findById(couponId)
-                    .orElseThrow(() -> new BusinessException(ErrorType.COUPON_NOT_FOUND));
+                    .orElseThrow(() -> new BusinessException(BusinessError.COUPON_NOT_FOUND));
             redisService.set(stockKey, (long) coupon.getRemainingQuantity());
         }
     }

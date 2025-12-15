@@ -12,7 +12,7 @@ import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.user.entity.User;
 import com.example.springboot_app.domain.user.entity.UserRole;
 import com.example.springboot_app.domain.user.repository.UserRepository;
-import com.example.springboot_app.global.enums.ErrorType;
+import com.example.springboot_app.global.enums.BusinessError;
 import com.example.springboot_app.global.error.exception.BusinessException;
 import com.example.springboot_app.global.security.JwtProvider;
 import com.example.springboot_app.global.service.RedisService;
@@ -36,7 +36,7 @@ public class AuthService {
     @Transactional
     public void signup(AuthParam.Signup param) {
         if (userRepository.existsByEmail(param.email())) {
-            throw new BusinessException(ErrorType.EMAIL_ALREADY_EXISTS);
+            throw new BusinessException(BusinessError.EMAIL_ALREADY_EXISTS);
         }
 
         UserRole role = adminEmails.contains(param.email()) ? UserRole.ADMIN : UserRole.USER;
@@ -54,10 +54,10 @@ public class AuthService {
     @Transactional(readOnly = true)
     public AuthResult.Token login(AuthParam.Login param) {
         User user = userRepository.findByEmail(param.email())
-                .orElseThrow(() -> new BusinessException(ErrorType.INVALID_CREDENTIALS));
+                .orElseThrow(() -> new BusinessException(BusinessError.INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(param.password(), user.getPassword())) {
-            throw new BusinessException(ErrorType.INVALID_CREDENTIALS);
+            throw new BusinessException(BusinessError.INVALID_CREDENTIALS);
         }
 
         String accessToken = jwtProvider.createAccessToken(user.getId(), user.getEmail(), user.getRole().getAuthority());
@@ -73,7 +73,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public AuthResult.UserInfo getUserInfo(String email, String accessToken, String refreshToken) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorType.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(BusinessError.USER_NOT_FOUND));
         
         long atExpiresIn = jwtProvider.getExpirationRemainSeconds(accessToken);
         long rtExpiresIn = jwtProvider.getExpirationRemainSeconds(refreshToken);
@@ -87,18 +87,18 @@ public class AuthService {
 
     public AuthResult.Token refresh(String refreshToken) {
         if (refreshToken == null || !jwtProvider.validateToken(refreshToken)) {
-            throw new BusinessException(ErrorType.INVALID_TOKEN);
+            throw new BusinessException(BusinessError.INVALID_TOKEN);
         }
 
         Long userId = jwtProvider.getUserIdFromToken(refreshToken);
         String savedToken = (String) redisService.get("refresh:" + userId);
 
         if (savedToken == null || !savedToken.equals(refreshToken)) {
-            throw new BusinessException(ErrorType.INVALID_TOKEN);
+            throw new BusinessException(BusinessError.INVALID_TOKEN);
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorType.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(BusinessError.USER_NOT_FOUND));
 
         // Issue new tokens with role and userId
         String newAccessToken = jwtProvider.createAccessToken(user.getId(), user.getEmail(), user.getRole().getAuthority());

@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.springboot_app.domain.coupon.entity.Coupon;
 import com.example.springboot_app.domain.coupon.repository.CouponRepository;
-import com.example.springboot_app.global.enums.ErrorType;
+import com.example.springboot_app.global.enums.BusinessError;
 import com.example.springboot_app.global.error.exception.BusinessException;
 import com.example.springboot_app.global.service.RedisService;
 
@@ -59,7 +59,7 @@ public class AdminService {
 
         // Redis에 없으면 DB에서 조회 (방어적 코드)
         Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new BusinessException(ErrorType.COUPON_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(BusinessError.COUPON_NOT_FOUND));
         
         return coupon.getRemainingQuantity();
     }
@@ -70,7 +70,7 @@ public class AdminService {
     @Transactional
     public void refreshCouponStock(Long couponId) {
         Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new BusinessException(ErrorType.COUPON_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(BusinessError.COUPON_NOT_FOUND));
         
         String stockKey = String.format(COUPON_STOCK_KEY, couponId);
         redisService.set(stockKey, (long) coupon.getRemainingQuantity());
