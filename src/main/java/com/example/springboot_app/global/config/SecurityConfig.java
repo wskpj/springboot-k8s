@@ -54,7 +54,7 @@ public class SecurityConfig {
                     // @AuthAdmin - ROLE_ADMIN 체크
                     // @AuthPublic - 인증 없이 통과
                     // 나머지는 Spring Security 기본 인증 필요
-                    .requestMatchers(request -> authResolver.hasAnnotation(request, AuthAdmin.class)).hasRole("ROLE_ADMIN")
+                    .requestMatchers(request -> authResolver.hasAnnotation(request, AuthAdmin.class)).hasRole("ADMIN")
                     .requestMatchers(request -> authResolver.hasAnnotation(request, AuthPublic.class)).permitAll()
                     .anyRequest().authenticated()
             )

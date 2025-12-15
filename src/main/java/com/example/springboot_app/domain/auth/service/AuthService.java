@@ -65,7 +65,7 @@ public class AuthService {
 
         // Save refresh token in Redis with TTL equal to token expiration
         long ttl = jwtProvider.getExpirationRemainSeconds(refreshToken);
-        redisService.set("refresh:" + user.getEmail(), refreshToken, ttl);
+        redisService.set("refresh:" + user.getId(), refreshToken, ttl);
 
         return new AuthResult.Token(accessToken, refreshToken);
     }
@@ -81,8 +81,8 @@ public class AuthService {
         return new AuthResult.UserInfo(user, atExpiresIn, rtExpiresIn);
     }
 
-    public void logout(String email) {
-        redisService.delete("refresh:" + email);
+    public void logout(Long userId) {
+        redisService.delete("refresh:" + userId);
     }
 
     public AuthResult.Token refresh(String refreshToken) {
@@ -90,14 +90,14 @@ public class AuthService {
             throw new BusinessException(ErrorType.INVALID_TOKEN);
         }
 
-        String email = jwtProvider.getEmailFromToken(refreshToken);
-        String savedToken = (String) redisService.get("refresh:" + email);
+        Long userId = jwtProvider.getUserIdFromToken(refreshToken);
+        String savedToken = (String) redisService.get("refresh:" + userId);
 
         if (savedToken == null || !savedToken.equals(refreshToken)) {
             throw new BusinessException(ErrorType.INVALID_TOKEN);
         }
 
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorType.USER_NOT_FOUND));
 
         // Issue new tokens with role and userId
@@ -105,7 +105,7 @@ public class AuthService {
         String newRefreshToken = jwtProvider.createRefreshToken(user.getId());
 
         long newTtl = jwtProvider.getExpirationRemainSeconds(newRefreshToken);
-        redisService.set("refresh:" + email, newRefreshToken, newTtl);
+        redisService.set("refresh:" + userId, newRefreshToken, newTtl);
 
         return new AuthResult.Token(newAccessToken, newRefreshToken);
     }
