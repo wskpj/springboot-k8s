@@ -34,12 +34,13 @@ public class JwtProvider {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createAccessToken(String email) {
+    public String createAccessToken(String email, String role) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + this.accessTokenValidityInSeconds * 1000);
 
         return Jwts.builder()
                 .subject(email)
+                .claim("role", role)
                 .issuedAt(now)
                 .expiration(validity)
                 .signWith(key)
@@ -83,6 +84,15 @@ public class JwtProvider {
                 .parseSignedClaims(token)
                 .getPayload();
         return claims.getSubject();
+    }
+
+    public String getRoleFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.get("role", String.class);
     }
 
     public long getExpirationRemainSeconds(String token) {

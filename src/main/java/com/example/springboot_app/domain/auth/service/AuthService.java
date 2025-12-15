@@ -1,5 +1,8 @@
 package com.example.springboot_app.domain.auth.service;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.springboot_app.domain.auth.dto.AuthParam;
 import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.user.entity.User;
+import com.example.springboot_app.domain.user.entity.UserRole;
 import com.example.springboot_app.domain.user.repository.UserRepository;
 import com.example.springboot_app.global.enums.ErrorType;
 import com.example.springboot_app.global.error.exception.BusinessException;
@@ -26,16 +30,22 @@ public class AuthService {
     // Refresh Token storage using Redis
     private final RedisService redisService;
 
+    @Value("${app.admin-emails}")
+    private List<String> adminEmails;
+
     @Transactional
     public void signup(AuthParam.Signup param) {
         if (userRepository.existsByEmail(param.email())) {
             throw new BusinessException(ErrorType.EMAIL_ALREADY_EXISTS);
         }
 
+        UserRole role = adminEmails.contains(param.email()) ? UserRole.ADMIN : UserRole.USER;
+
         User user = User.builder()
                 .email(param.email())
                 .password(passwordEncoder.encode(param.password()))
                 .name(param.name())
+                .role(role)
                 .build();
 
         userRepository.save(user);
@@ -50,7 +60,7 @@ public class AuthService {
             throw new BusinessException(ErrorType.INVALID_CREDENTIALS);
         }
 
-        String accessToken = jwtProvider.createAccessToken(user.getEmail());
+        String accessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().getAuthority());
         String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
 
         // Save refresh token in Redis with TTL equal to token expiration
@@ -87,8 +97,11 @@ public class AuthService {
             throw new BusinessException(ErrorType.INVALID_TOKEN);
         }
 
-        // Issue new tokens
-        String newAccessToken = jwtProvider.createAccessToken(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorType.USER_NOT_FOUND));
+
+        // Issue new tokens with role
+        String newAccessToken = jwtProvider.createAccessToken(email, user.getRole().getAuthority());
         String newRefreshToken = jwtProvider.createRefreshToken(email);
 
         long newTtl = jwtProvider.getExpirationRemainSeconds(newRefreshToken);

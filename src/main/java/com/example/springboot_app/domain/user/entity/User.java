@@ -27,11 +27,16 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role;
+
     @Builder
-    public User(String email, String password, String name) {
+    public User(String email, String password, String name, UserRole role) {
         this.email = email;
         this.password = password;
         this.name = name;
+        this.role = role != null ? role : UserRole.USER;
     }
 
     // 비즈니스 로직 - 비밀번호 변경

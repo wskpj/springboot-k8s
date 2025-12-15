@@ -1,6 +1,7 @@
 package com.example.springboot_app.domain.coupon.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.springboot_app.domain.coupon.entity.Coupon;
 import com.example.springboot_app.domain.coupon.repository.CouponRepository;

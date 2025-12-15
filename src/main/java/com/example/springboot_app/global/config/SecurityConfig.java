@@ -43,8 +43,9 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)) // for H2 console
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/signup", "/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/coupons/**").authenticated()
+                        .requestMatchers("/api/v1/auth/signup", "/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/users/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
