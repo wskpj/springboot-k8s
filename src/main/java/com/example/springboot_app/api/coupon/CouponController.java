@@ -1,15 +1,16 @@
 package com.example.springboot_app.api.coupon;
 
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.springboot_app.api.coupon.dto.CouponResponse;
 import com.example.springboot_app.domain.coupon.entity.Coupon;
 import com.example.springboot_app.domain.coupon.repository.CouponRepository;
 import com.example.springboot_app.domain.coupon.service.CouponService;
 import com.example.springboot_app.global.enums.ErrorType;
 import com.example.springboot_app.global.error.exception.BusinessException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.springboot_app.global.security.AuthUser;
 
-import java.security.Principal;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,11 +20,11 @@ public class CouponController implements CouponApi {
     private final CouponRepository couponRepository;
 
     @Override
-    public void issueCoupon(Long id, Principal principal) {
-        if (principal == null) {
+    public void issueCoupon(Long id, AuthUser user) {
+        if (user == null) {
             throw new BusinessException(ErrorType.UNAUTHORIZED);
         }
-        couponService.issueCoupon(id, principal.getName());
+        couponService.issueCoupon(id, user.getEmail());
     }
 
     @Override

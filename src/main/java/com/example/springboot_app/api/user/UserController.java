@@ -2,6 +2,7 @@ package com.example.springboot_app.api.user;
 
 import com.example.springboot_app.api.common.dto.SearchRequest;
 import com.example.springboot_app.api.user.dto.UserResponse;
+import com.example.springboot_app.domain.auth.annotations.AuthPublic;
 import com.example.springboot_app.domain.common.dto.Paged;
 import com.example.springboot_app.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;

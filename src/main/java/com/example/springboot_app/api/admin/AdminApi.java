@@ -15,8 +15,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+import com.example.springboot_app.domain.auth.annotations.AuthAdmin;
+
 @Tag(name = "Admin Coupon API", description = "관리자 전용 쿠폰 관리 API")
 @RequestMapping("/api/v1/admin")
+@AuthAdmin
 public interface AdminApi {
 
     @Operation(summary = "쿠폰 생성", description = "새로운 쿠폰을 시스템에 등록합니다.")

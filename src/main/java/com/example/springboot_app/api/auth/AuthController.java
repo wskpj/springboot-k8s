@@ -1,7 +1,5 @@
 package com.example.springboot_app.api.auth;
 
-import java.security.Principal;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +10,7 @@ import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.auth.service.AuthService;
 import com.example.springboot_app.global.enums.ErrorType;
 import com.example.springboot_app.global.error.exception.BusinessException;
+import com.example.springboot_app.global.security.AuthUser;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,18 +43,18 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public AuthResponse.UserInfo getMe(Principal principal, String authHeader, String refreshToken) {
-        if (principal == null) {
+    public AuthResponse.UserInfo getMe(AuthUser user, String authHeader, String refreshToken) {
+        if (user == null) {
             throw new BusinessException(ErrorType.UNAUTHORIZED);
         }
         String accessToken = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
-        return AuthResponse.UserInfo.from(authService.getUserInfo(principal.getName(), accessToken, refreshToken));
+        return AuthResponse.UserInfo.from(authService.getUserInfo(user.getEmail(), accessToken, refreshToken));
     }
 
     @Override
-    public void logout(Principal principal, HttpServletResponse response) {
-        if (principal != null) {
-            authService.logout(principal.getName());
+    public void logout(AuthUser user, HttpServletResponse response) {
+        if (user != null) {
+            authService.logout(user.getEmail());
         }
         
         // Clear cookie
