@@ -1,18 +1,19 @@
 package com.example.springboot_app.global.security;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
 
 @Slf4j
 @Component
@@ -34,12 +35,13 @@ public class JwtProvider {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createAccessToken(String email, String role) {
+    public String createAccessToken(Long userId,String email, String role) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + this.accessTokenValidityInSeconds * 1000);
 
         return Jwts.builder()
-                .subject(email)
+                .subject(String.valueOf(userId))
+                .claim("email", email)
                 .claim("role", role)
                 .issuedAt(now)
                 .expiration(validity)
@@ -47,12 +49,12 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String createRefreshToken(String email) {
+    public String createRefreshToken(Long userId) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + this.refreshTokenValidityInSeconds * 1000);
 
         return Jwts.builder()
-                .subject(email)
+                .subject(String.valueOf(userId))
                 .issuedAt(now)
                 .expiration(validity)
                 .signWith(key)
@@ -77,13 +79,23 @@ public class JwtProvider {
         return false;
     }
 
+    public Long getUserIdFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return Long.parseLong(claims.getSubject());
+    }
+
+
     public String getEmailFromToken(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        return claims.getSubject();
+        return claims.get("email", String.class);
     }
 
     public String getRoleFromToken(String token) {
@@ -94,7 +106,6 @@ public class JwtProvider {
                 .getPayload();
         return claims.get("role", String.class);
     }
-
     public long getExpirationRemainSeconds(String token) {
         if (token == null || !validateToken(token)) return 0;
         Claims claims = Jwts.parser()

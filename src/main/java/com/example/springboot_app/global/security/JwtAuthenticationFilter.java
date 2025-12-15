@@ -26,13 +26,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = jwtProvider.resolveToken(request);
 
         if (token != null && jwtProvider.validateToken(token)) {
-            String email = jwtProvider.getEmailFromToken(token);
+            Long userId = jwtProvider.getUserIdFromToken(token);
             String role = jwtProvider.getRoleFromToken(token);
 
             SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role != null ? role : "ROLE_USER");
 
             UserDetails userDetails = User.builder()
-                    .username(email)
+                    .username(String.valueOf(userId))
                     .password("") 
                     .authorities(List.of(authority))
                     .build();

@@ -60,8 +60,8 @@ public class AuthService {
             throw new BusinessException(ErrorType.INVALID_CREDENTIALS);
         }
 
-        String accessToken = jwtProvider.createAccessToken(user.getEmail(), user.getRole().getAuthority());
-        String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
+        String accessToken = jwtProvider.createAccessToken(user.getId(), user.getEmail(), user.getRole().getAuthority());
+        String refreshToken = jwtProvider.createRefreshToken(user.getId());
 
         // Save refresh token in Redis with TTL equal to token expiration
         long ttl = jwtProvider.getExpirationRemainSeconds(refreshToken);
@@ -100,9 +100,9 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorType.USER_NOT_FOUND));
 
-        // Issue new tokens with role
-        String newAccessToken = jwtProvider.createAccessToken(email, user.getRole().getAuthority());
-        String newRefreshToken = jwtProvider.createRefreshToken(email);
+        // Issue new tokens with role and userId
+        String newAccessToken = jwtProvider.createAccessToken(user.getId(), user.getEmail(), user.getRole().getAuthority());
+        String newRefreshToken = jwtProvider.createRefreshToken(user.getId());
 
         long newTtl = jwtProvider.getExpirationRemainSeconds(newRefreshToken);
         redisService.set("refresh:" + email, newRefreshToken, newTtl);
