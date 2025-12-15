@@ -1,4 +1,4 @@
-package com.example.springboot_app.global.handler;
+package com.example.springboot_app.global.exception.handler;
 
 import java.util.List;
 
@@ -9,9 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.example.springboot_app.api.common.dto.ApiResult;
-import com.example.springboot_app.global.enums.ErrorType;
-import com.example.springboot_app.global.enums.GlobalError;
+import com.example.springboot_app.global.exception.enums.GlobalError;
+import com.example.springboot_app.global.response.types.ApiResult;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

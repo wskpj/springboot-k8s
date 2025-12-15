@@ -7,9 +7,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
-import com.example.springboot_app.api.common.dto.ApiResult;
-import com.example.springboot_app.api.common.dto.ErrorResponse;
-import com.example.springboot_app.global.enums.GlobalError;
+import com.example.springboot_app.global.exception.enums.GlobalError;
+import com.example.springboot_app.global.response.types.ApiError;
+import com.example.springboot_app.global.response.types.ApiResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,8 +29,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         
         String requestId = MDC.get("requestId");
-        ErrorResponse errorResponse = ErrorResponse.of(GlobalError.UNAUTHORIZED, request.getRequestURI(), e.getMessage());
-        ApiResult<Void> apiResult = ApiResult.fail(errorResponse, requestId);
+        ApiError apiError = ApiError.of(GlobalError.UNAUTHORIZED, request.getRequestURI(), e.getMessage());
+        ApiResult<Void> apiResult = ApiResult.fail(apiError, requestId);
 
         response.getWriter().write(objectMapper.writeValueAsString(apiResult));
     }

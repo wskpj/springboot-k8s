@@ -12,8 +12,8 @@ import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.user.entity.User;
 import com.example.springboot_app.domain.user.entity.UserRole;
 import com.example.springboot_app.domain.user.repository.UserRepository;
-import com.example.springboot_app.global.enums.BusinessError;
-import com.example.springboot_app.global.error.exception.BusinessException;
+import com.example.springboot_app.global.exception.enums.BusinessError;
+import com.example.springboot_app.global.exception.types.BusinessException;
 import com.example.springboot_app.global.security.JwtProvider;
 import com.example.springboot_app.global.service.RedisService;
 

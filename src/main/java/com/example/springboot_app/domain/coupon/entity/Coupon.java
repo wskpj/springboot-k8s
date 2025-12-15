@@ -1,8 +1,8 @@
 package com.example.springboot_app.domain.coupon.entity;
 
 import com.example.springboot_app.domain.common.entity.BaseEntity;
-import com.example.springboot_app.global.enums.BusinessError;
-import com.example.springboot_app.global.error.exception.BusinessException;
+import com.example.springboot_app.global.exception.enums.BusinessError;
+import com.example.springboot_app.global.exception.types.BusinessException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

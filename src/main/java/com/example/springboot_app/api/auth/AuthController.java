@@ -8,8 +8,8 @@ import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
 import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.auth.service.AuthService;
-import com.example.springboot_app.global.enums.BusinessError;
-import com.example.springboot_app.global.error.exception.BusinessException;
+import com.example.springboot_app.global.exception.enums.BusinessError;
+import com.example.springboot_app.global.exception.types.BusinessException;
 import com.example.springboot_app.global.security.AuthUser;
 
 import jakarta.servlet.http.Cookie;

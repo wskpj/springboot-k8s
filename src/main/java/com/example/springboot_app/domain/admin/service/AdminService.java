@@ -7,8 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.springboot_app.domain.coupon.entity.Coupon;
 import com.example.springboot_app.domain.coupon.repository.CouponRepository;
-import com.example.springboot_app.global.enums.BusinessError;
-import com.example.springboot_app.global.error.exception.BusinessException;
+import com.example.springboot_app.global.exception.enums.BusinessError;
+import com.example.springboot_app.global.exception.types.BusinessException;
 import com.example.springboot_app.global.service.RedisService;
 
 import lombok.RequiredArgsConstructor;

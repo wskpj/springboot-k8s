@@ -1,6 +1,6 @@
-package com.example.springboot_app.global.handler;
+package com.example.springboot_app.global.response.handler;
 
-import com.example.springboot_app.api.common.dto.ApiResult;
+import com.example.springboot_app.global.response.types.ApiResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

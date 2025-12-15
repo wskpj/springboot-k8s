@@ -1,4 +1,4 @@
-package com.example.springboot_app.api.common.dto;
+package com.example.springboot_app.global.response.types;
 
 import java.time.OffsetDateTime;
 
@@ -13,9 +13,9 @@ public class ApiResult<T> {
     private final String timestamp;
     private final String requestId;
     private final T data;
-    private final ErrorResponse error;
+    private final ApiError error;
 
-    private ApiResult(boolean success, String requestId, T data, ErrorResponse error) {
+    private ApiResult(boolean success, String requestId, T data, ApiError error) {
         this.success = success;
         this.timestamp = OffsetDateTime.now().toString();
         this.requestId = requestId;
@@ -27,7 +27,7 @@ public class ApiResult<T> {
         return new ApiResult<>(true, requestId, data, null);
     }
 
-    public static <T> ApiResult<T> fail(ErrorResponse error, String requestId) {
+    public static <T> ApiResult<T> fail(ApiError error, String requestId) {
         return new ApiResult<>(false, requestId, null, error);
     }
 }

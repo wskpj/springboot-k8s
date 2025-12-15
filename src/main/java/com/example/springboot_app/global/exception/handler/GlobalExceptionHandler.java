@@ -1,4 +1,4 @@
-package com.example.springboot_app.global.handler;
+package com.example.springboot_app.global.exception.handler;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
@@ -7,11 +7,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.example.springboot_app.api.common.dto.ApiResult;
-import com.example.springboot_app.global.enums.GlobalError;
-import com.example.springboot_app.global.error.exception.BusinessException;
-import com.example.springboot_app.global.error.exception.InfrastructureException;
-import com.example.springboot_app.global.error.exception.SystemException;
+import com.example.springboot_app.global.exception.enums.GlobalError;
+import com.example.springboot_app.global.exception.types.BusinessException;
+import com.example.springboot_app.global.exception.types.InfrastructureException;
+import com.example.springboot_app.global.exception.types.SystemException;
+import com.example.springboot_app.global.response.types.ApiResult;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +26,8 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
      */
     @ExceptionHandler(BusinessException.class)
     private ResponseEntity<ApiResult<Void>> handleBusinessException(BusinessException e, HttpServletRequest request) {
-        log.warn("Business Exception [{}]: {}", e.getErrorCode().getCode(), e.getMessage());
-        return responseError(e.getErrorCode(), request.getRequestURI(), e.getDetails());
+        log.warn("Business Exception [{}]: {}", e.getErrorType().getCode(), e.getMessage());
+        return responseError(e.getErrorType(), request.getRequestURI(), e.getDetails());
     }
     
     /**
@@ -35,8 +35,8 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
      */
     @ExceptionHandler(SystemException.class)
     private ResponseEntity<ApiResult<Void>> handleSystemException(SystemException e, HttpServletRequest request) {
-        log.error("System Exception [{}]: {}", e.getErrorCode().getCode(), e.getMessage());
-        return responseError(e.getErrorCode(), request.getRequestURI(), e.getDetails());
+        log.error("System Exception [{}]: {}", e.getErrorType().getCode(), e.getMessage());
+        return responseError(e.getErrorType(), request.getRequestURI(), e.getDetails());
     }
 
     /**
@@ -44,8 +44,8 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
      */
     @ExceptionHandler(InfrastructureException.class)
     private ResponseEntity<ApiResult<Void>> handleInfrastructureException(InfrastructureException e, HttpServletRequest request) {
-        log.error("Infrastructure Exception [{}]: {}", e.getErrorCode().getCode(), e.getMessage());
-        return responseError(e.getErrorCode(), request.getRequestURI(), e.getDetails());
+        log.error("Infrastructure Exception [{}]: {}", e.getErrorType().getCode(), e.getMessage());
+        return responseError(e.getErrorType(), request.getRequestURI(), e.getDetails());
     }
 
     /**

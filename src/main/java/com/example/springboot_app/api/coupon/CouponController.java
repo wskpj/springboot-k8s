@@ -6,8 +6,8 @@ import com.example.springboot_app.api.coupon.dto.CouponResponse;
 import com.example.springboot_app.domain.coupon.entity.Coupon;
 import com.example.springboot_app.domain.coupon.repository.CouponRepository;
 import com.example.springboot_app.domain.coupon.service.CouponService;
-import com.example.springboot_app.global.enums.BusinessError;
-import com.example.springboot_app.global.error.exception.BusinessException;
+import com.example.springboot_app.global.exception.enums.BusinessError;
+import com.example.springboot_app.global.exception.types.BusinessException;
 import com.example.springboot_app.global.security.AuthUser;
 
 import lombok.RequiredArgsConstructor;
