@@ -20,4 +20,20 @@ public class AdminController implements AdminApi {
         Coupon coupon = adminService.createCoupon(request.title(), request.totalQuantity());
         return new CouponResponse.Stock(coupon.getId(), coupon.getRemainingQuantity());
     }
+
+    @Override
+    public CouponResponse.Stock getCouponStock(Long id) {
+        int stock = adminService.getCouponStock(id);
+        return new CouponResponse.Stock(id, stock);
+    }
+
+    @Override
+    public void refreshStock(Long id) {
+        adminService.refreshCouponStock(id);
+    }
+
+    @Override
+    public void syncStock() {
+        adminService.syncStockNow();
+    }
 }

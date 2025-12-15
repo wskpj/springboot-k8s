@@ -43,8 +43,13 @@ public class CouponCacheManager {
         List<Coupon> coupons = couponRepository.findAll();
         for (Coupon coupon : coupons) {
             String stockKey = String.format(COUPON_STOCK_KEY, coupon.getId());
-            redisService.set(stockKey, (long) coupon.getRemainingQuantity());
-            log.info("[CouponCacheManager] Warmed up coupon {}: stock={}", coupon.getId(), coupon.getRemainingQuantity());
+            boolean initialized = redisService.setIfAbsent(stockKey, (long) coupon.getRemainingQuantity());
+            
+            if (initialized) {
+                log.info("[CouponCacheManager] Warmed up coupon {}: stock={}", coupon.getId(), coupon.getRemainingQuantity());
+            } else {
+                log.info("[CouponCacheManager] Coupon {} already has stock in Redis, skipping warmup to protect live data.", coupon.getId());
+            }
         }
     }
 
