@@ -1,8 +1,8 @@
 package com.example.springboot_app.global.config;
 
-import com.example.springboot_app.global.security.JwtAuthenticationFilter;
-import com.example.springboot_app.global.security.JwtProvider;
-import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,8 +18,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-import java.util.List;
+import com.example.springboot_app.domain.auth.annotations.AuthAdmin;
+import com.example.springboot_app.domain.auth.annotations.AuthPublic;
+import com.example.springboot_app.global.resolver.AuthAnnotationResolver;
+import com.example.springboot_app.global.security.JwtAuthenticationFilter;
+import com.example.springboot_app.global.security.JwtProvider;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -27,6 +32,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
+    private final AuthAnnotationResolver authResolver;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -35,24 +41,24 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)) // for H2 console
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/coupons/**").authenticated()
-                        .requestMatchers("/api/v1/auth/signup", "/api/v1/auth/login").permitAll()
-                        .requestMatchers("/api/v1/users/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+        http.csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .formLogin(AbstractHttpConfigurer::disable)
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)) // for H2 console
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() 
+                    .requestMatchers("/h2-console/**", "/actuator/**").permitAll()
+                    // 어노테이션 기반 커스텀 권한 검증 로직
+                    // @AuthAdmin - ROLE_ADMIN 체크
+                    // @AuthPublic - 인증 없이 통과
+                    // 나머지는 Spring Security 기본 인증 필요
+                    .requestMatchers(request -> authResolver.hasAnnotation(request, AuthAdmin.class)).hasRole("ROLE_ADMIN")
+                    .requestMatchers(request -> authResolver.hasAnnotation(request, AuthPublic.class)).permitAll()
+                    .anyRequest().authenticated()
+            )
+            .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
