@@ -76,8 +76,8 @@ public class RedisService {
         return redisTemplate.opsForValue().increment(key, -delta);
     }
 
-    public void sAdd(String key, Object value) {
-        redisTemplate.opsForSet().add(key, value);
+    public Long sAdd(String key, Object value) {
+        return redisTemplate.opsForSet().add(key, value);
     }
 
     public Set<Object> sMembers(String key) {

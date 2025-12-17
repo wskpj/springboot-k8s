@@ -21,7 +21,7 @@ public class CouponController implements CouponApi {
 
     @Override
     public void issueCoupon(Long id, AuthUser user) {
-        couponService.issueCoupon(id, user.getEmail());
+        couponService.issueCoupon(id, user.getId());
     }
 
     @Override
