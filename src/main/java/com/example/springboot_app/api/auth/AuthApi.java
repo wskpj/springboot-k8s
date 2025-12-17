@@ -43,7 +43,10 @@ public interface AuthApi {
 
     @Operation(summary = "User Logout", description = "Invalidates the user session and clears cookies.")
     @PostMapping("/logout")
-    void logout(AuthUser user, HttpServletResponse response);
+    void logout(
+            AuthUser user,
+            @CookieValue(value = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response);
 
     @Operation(summary = "Refresh Token", description = "Gets a new access token using the refresh token.")
     @PostMapping("/refresh")

@@ -49,9 +49,9 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public void logout(AuthUser user, HttpServletResponse response) {
+    public void logout(AuthUser user, String refreshToken, HttpServletResponse response) {
         if (user != null) {
-            authService.logout(user.getId());
+            authService.logout(user.getId(), refreshToken);
         }
         
         // Clear cookie
