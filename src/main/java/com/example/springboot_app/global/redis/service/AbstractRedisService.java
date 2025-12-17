@@ -18,22 +18,22 @@ public abstract class AbstractRedisService<K extends RedisKey> {
     /**
      * 키 존재 여부 확인
      */
-    public Boolean hasKey(KeyBinding<K> binding) {
-        return redisTemplate.hasKey(binding.key());
+    public Boolean hasKey(KeyBinding<K> b) {
+        return redisTemplate.hasKey(b.key());
     }
 
     /**
      * 키 삭제
      */
-    public Boolean delete(KeyBinding<K> binding) {
-        return redisTemplate.delete(binding.key());
+    public Boolean delete(KeyBinding<K> b) {
+        return redisTemplate.delete(b.key());
     }
 
     /**
      * 키 만료 시간 설정 (seconds)
      */
-    public Boolean expire(KeyBinding<K> binding, long timeout) {
-        return redisTemplate.expire(binding.key(), timeout, TimeUnit.SECONDS);
+    public Boolean expire(KeyBinding<K> b, long timeout) {
+        return redisTemplate.expire(b.key(), timeout, TimeUnit.SECONDS);
     }
 
 }
