@@ -5,27 +5,26 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.springboot_app.domain.coupon.entity.Coupon;
 import com.example.springboot_app.domain.coupon.entity.UserCoupon;
+import com.example.springboot_app.domain.coupon.redis.CouponRedisRepository;
 import com.example.springboot_app.domain.coupon.repository.CouponRepository;
 import com.example.springboot_app.domain.coupon.repository.UserCouponRepository;
 import com.example.springboot_app.domain.user.repository.UserRepository;
-import com.example.springboot_app.global.service.RedisKey;
-import com.example.springboot_app.global.service.RedisService;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 public class CouponCacheManager {
 
-    private final RedisService redisService;
+    private final CouponRedisRepository couponRedisRepository;
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
     private final UserRepository userRepository;
@@ -34,13 +33,11 @@ public class CouponCacheManager {
      * 서버 기동 시 현재 재고 데이터를 Redis로 웜업
      */
     @PostConstruct
-    @Transactional(readOnly = true)
-    public void warmup() {
+    public void warmupStock() {
         log.info("[CouponCacheManager] Warming up coupon stock to Redis...");
         List<Coupon> coupons = couponRepository.findAll();
         for (Coupon coupon : coupons) {
-            String stockKey = String.format(RedisKey.COUPON_STOCK.of(coupon.getId()));
-            boolean initialized = redisService.setIfAbsent(stockKey, (long) coupon.getRemainingQuantity());
+            boolean initialized = couponRedisRepository.initializeStock(coupon.getId(), coupon.getRemainingQuantity());
             
             if (initialized) {
                 log.info("[CouponCacheManager] Warmed up coupon {}: stock={}", coupon.getId(), coupon.getRemainingQuantity());
@@ -51,44 +48,40 @@ public class CouponCacheManager {
     }
 
     /**
-     * 1초마다 변경된 재고를 DB에 반영 (Async Sync)
+     * 주기적으로 Redis의 재고 변경사항을 DB에 싱크 (Write-Back)
      */
     @Scheduled(fixedDelay = 1000)
     public void syncStockToDb() {
-        Set<Object> syncIds = redisService.sMembers(RedisKey.COUPON_SYNC_IDS.of());
+        Set<String> syncIds = couponRedisRepository.getAndClearSyncIds();
         if (syncIds == null || syncIds.isEmpty()) return;
 
         log.debug("[CouponCacheManager] Syncing stock for {} coupons...", syncIds.size());
-        redisService.delete(RedisKey.COUPON_SYNC_IDS.of());
 
-        for (Object idObj : syncIds) {
-            String idStr = idObj.toString();
-            String stockKey = String.format(RedisKey.COUPON_STOCK.of(idStr));
-            Object stockObj = redisService.get(stockKey);
+        for (String idStr : syncIds) {
+            Long couponId = Long.valueOf(idStr);
+            Integer remaining = couponRedisRepository.getStock(couponId);
             
-            if (stockObj != null) {
-                Long remaining = Long.valueOf(stockObj.toString());
-                couponRepository.updateRemainingQuantity(Long.valueOf(idStr), remaining.intValue());
+            if (remaining != null) {
+                couponRepository.updateRemainingQuantity(couponId, remaining);
             }
         }
     }
 
     /**
-     * 1초마다 발급 큐를 확인하여 DB에 벌크 저장
+     * 비동기 발급 큐를 소모하여 DB에 저장
      */
     @Scheduled(fixedDelay = 1000)
     @Transactional
     public void syncIssuanceToDb() {
         // 한 번에 최대 500개씩 처리
-        List<Object> events = redisService.lRange(RedisKey.COUPON_ISSUE_QUEUE.of(), 0, 499);
+        List<String> events = couponRedisRepository.getIssueEvents(500);
         if (events == null || events.isEmpty()) return;
 
         log.info("[CouponCacheManager] Syncing {} user coupons to DB...", events.size());
         
         List<UserCoupon> issues = new ArrayList<>();
-        for (Object eventObj : events) {
-            String event = eventObj.toString(); // format: "userId:couponId"
-            String[] parts = event.split(":");
+        for (String event : events) {
+            String[] parts = event.split(":"); // format: "userId:couponId"
             if (parts.length == 2) {
                 Long userId = Long.valueOf(parts[0]);
                 Long couponId = Long.valueOf(parts[1]);
@@ -104,7 +97,7 @@ public class CouponCacheManager {
         if (!issues.isEmpty()) {
             userCouponRepository.saveAll(issues);
             // 처리한 만큼 큐에서 제거
-            redisService.lTrim(RedisKey.COUPON_ISSUE_QUEUE.of(), events.size(), -1);
+            couponRedisRepository.trimIssueEvents(events.size());
             log.info("[CouponCacheManager] Successfully synced {} user coupons.", issues.size());
         }
     }
