@@ -18,9 +18,9 @@ public class RedisConfig {
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
 
-        // Value Serializer: JSON - value에 String만 사용하므로 비활성화
-        // template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        // template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        // Value Serializer: String
+        template.setValueSerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new StringRedisSerializer());
 
         template.afterPropertiesSet();
         return template;
