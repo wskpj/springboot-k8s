@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum RedisStringKey implements RedisKey {
 
-    COUPON_STOCK("coupon:%d:stock");
+    COUPON_STOCK("coupon:%d:stock"),
+    RATE_LIMIT("rate_limit:%s:%s"),
+    LOGIN_FAIL_COUNT("login_fail:%s");
 
     private final String pattern;
 

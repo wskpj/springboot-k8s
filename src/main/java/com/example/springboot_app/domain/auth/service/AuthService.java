@@ -23,6 +23,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthService {
 
+    private static final int MAX_LOGIN_ATTEMPTS = 5;
+    private static final long LOCKOUT_DURATION = 1800L; // 30 minutes
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
@@ -51,17 +54,35 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResult.Token login(AuthParam.Login param) {
+        // 1. 계정 잠금 상태 확인
+        int failCount = authRedisRepository.getLoginFailCount(param.email());
+        if (failCount >= MAX_LOGIN_ATTEMPTS) {
+            throw new BusinessException(BusinessError.TOO_MANY_LOGIN_ATTEMPTS);
+        }
+
         User user = userRepository.findByEmail(param.email())
-                .orElseThrow(() -> new BusinessException(BusinessError.INVALID_CREDENTIALS));
+                .orElseThrow(() -> {
+                    // 존재하지 않는 유저라도 보안상 실패 횟수 증가 (유저 존재 여부 유추 방지)
+                    authRedisRepository.incrementLoginFailCount(param.email(), LOCKOUT_DURATION);
+                    return new BusinessException(BusinessError.INVALID_CREDENTIALS);
+                });
 
         if (!passwordEncoder.matches(param.password(), user.getPassword())) {
+            // 2. 비밀번호 틀린 경우 실패 횟수 증가 및 잠금 처리
+            long currentFailCount = authRedisRepository.incrementLoginFailCount(user.getEmail(), LOCKOUT_DURATION);
+            if (currentFailCount >= MAX_LOGIN_ATTEMPTS) {
+                throw new BusinessException(BusinessError.TOO_MANY_LOGIN_ATTEMPTS);
+            }
             throw new BusinessException(BusinessError.INVALID_CREDENTIALS);
         }
+
+        // 3. 로그인 성공 시 실패 횟수 초기화
+        authRedisRepository.clearLoginFailCount(user.getEmail());
 
         String accessToken = jwtProvider.createAccessToken(user.getId(), user.getEmail(), user.getRole().getAuthority());
         String refreshToken = jwtProvider.createRefreshToken(user.getId());
 
-        // Save refresh token in Redis Set with TTL
+        // 4. Redis Set에 Refresh Token 저장
         long ttl = jwtProvider.getExpirationRemainSeconds(refreshToken);
         authRedisRepository.addRefreshToken(user.getId(), refreshToken, ttl);
 

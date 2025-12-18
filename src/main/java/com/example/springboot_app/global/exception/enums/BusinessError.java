@@ -19,6 +19,7 @@ public enum BusinessError implements ErrorType {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A401", "Unauthorized"),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A401", "Invalid token"),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "A401", "Invalid email or password"),
+    TOO_MANY_LOGIN_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, "A429", "Too many login attempts. Account temporarily locked."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "A403", "Access denied"),
 
     // Coupon (C)
