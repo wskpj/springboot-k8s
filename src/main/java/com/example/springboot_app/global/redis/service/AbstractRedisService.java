@@ -36,4 +36,11 @@ public abstract class AbstractRedisService<K extends RedisKey> {
         return redisTemplate.expire(b.key(), timeout, TimeUnit.SECONDS);
     }
 
+    /**
+     * 키 만료 시간 조회 (seconds)
+     */
+    public Long getExpire(KeyBinding<K> b) {
+        return redisTemplate.getExpire(b.key(), TimeUnit.SECONDS);
+    }
+
 }

@@ -15,6 +15,7 @@ public enum GlobalError implements ErrorType {
     FORBIDDEN(HttpStatus.FORBIDDEN, "G403", "Forbidden"),
     NOT_FOUND(HttpStatus.NOT_FOUND, "G404", "Not Found"),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "G405", "Method not allowed"),
+    TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "G429", "Too many requests"),
 
     // 5xx
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "G500", "Internal server error"),

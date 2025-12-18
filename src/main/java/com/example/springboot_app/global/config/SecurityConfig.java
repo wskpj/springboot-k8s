@@ -22,9 +22,12 @@ import com.example.springboot_app.domain.auth.annotations.AuthAdmin;
 import com.example.springboot_app.domain.auth.annotations.AuthPublic;
 import com.example.springboot_app.global.security.JwtAuthenticationFilter;
 import com.example.springboot_app.global.security.JwtProvider;
+import com.example.springboot_app.global.security.GlobalRateLimitFilter;
 import com.example.springboot_app.global.security.handler.CustomAccessDeniedHandler;
 import com.example.springboot_app.global.security.handler.CustomAuthenticationEntryPoint;
 import com.example.springboot_app.global.security.resolver.AuthAnnotationResolver;
+import com.example.springboot_app.global.bean.ApiGenerator;
+import com.example.springboot_app.global.redis.service.RedisStringService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,6 +40,8 @@ public class SecurityConfig {
     private final AuthAnnotationResolver authResolver;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final RedisStringService redisStringService;
+    private final ApiGenerator apiGenerator;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -66,7 +71,8 @@ public class SecurityConfig {
                     .authenticationEntryPoint(authenticationEntryPoint)
                     .accessDeniedHandler(accessDeniedHandler)
             )
-            .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(new GlobalRateLimitFilter(redisStringService, apiGenerator), JwtAuthenticationFilter.class);
 
         return http.build();
     }
