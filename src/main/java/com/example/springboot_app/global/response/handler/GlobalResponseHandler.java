@@ -15,14 +15,14 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-@RestControllerAdvice(basePackages = "com.example.springboot_app.api")
+@RestControllerAdvice(basePackages = "com.example.springboot_app")
 public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
 
     private final ApiGenerator apiGenerator;
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return true;  // basePackage 내 모든 응답에 대해 적용
+        return true;
     }
 
     @Override
