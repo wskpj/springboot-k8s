@@ -1,8 +1,6 @@
 package com.example.springboot_app.global.response.handler;
 
-import org.slf4j.MDC;
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
@@ -10,8 +8,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import com.example.springboot_app.global.response.types.ApiError;
-import com.example.springboot_app.global.response.types.ApiResult;
+import com.example.springboot_app.global.bean.ApiGenerator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RestControllerAdvice(basePackages = "com.example.springboot_app.api")
 public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
+
+    private final ApiGenerator apiGenerator;
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -30,16 +29,6 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                   ServerHttpRequest request, ServerHttpResponse response) {
-
-        String requestId = MDC.get("requestId");
-
-        // [1/2] 에러 응답인 경우 fail로 래핑
-        if (body instanceof ApiError apiError) {
-            response.setStatusCode(HttpStatusCode.valueOf(apiError.getStatus()));
-            return ApiResult.fail(apiError, requestId);
-        }
-
-        // [2/2] 성공 응답인 경우 success로 래핑
-        return ApiResult.success(body, requestId);
+        return apiGenerator.generate(body, response);
     }
 }
