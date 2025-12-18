@@ -27,6 +27,9 @@ public class ApiGenerator {
     public Object generate(Object body, ServerHttpResponse response) {
         String requestId = MDC.get("requestId");
 
+        // [0/2] 이미 ApiResult인 경우 그대로 반환
+        if (body instanceof ApiResult) return body;
+
         // [1/2] 에러 응답인 경우 fail로 래핑
         if (body instanceof ApiError apiError) {
             response.setStatusCode(HttpStatusCode.valueOf(apiError.getStatus()));
