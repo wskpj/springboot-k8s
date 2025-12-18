@@ -2,6 +2,7 @@ package com.example.springboot_app.global.response.handler;
 
 import org.slf4j.MDC;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
@@ -30,14 +31,11 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                   ServerHttpRequest request, ServerHttpResponse response) {
 
-        // 이미 ApiResult 형태인 경우 재래핑 방지
-        if (body instanceof ApiResult) return body;
-
-        // RequestId 추출
         String requestId = MDC.get("requestId");
 
         // [1/2] 에러 응답인 경우 fail로 래핑
         if (body instanceof ApiError apiError) {
+            response.setStatusCode(HttpStatusCode.valueOf(apiError.getStatus()));
             return ApiResult.fail(apiError, requestId);
         }
 

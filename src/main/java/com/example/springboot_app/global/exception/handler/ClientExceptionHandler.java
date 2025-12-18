@@ -4,7 +4,8 @@ import java.util.List;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.data.mapping.PropertyReferenceException;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,7 +27,7 @@ public class ClientExceptionHandler extends BaseExceptionHandler {
      * @Valid 어노테이션으로 인한 유효성 검사 실패 시 발생하는 예외 처리 (400)
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    private ResponseEntity<ApiError> handleMethodArgumentNotValidException(
+    private ApiError handleMethodArgumentNotValidException(
             MethodArgumentNotValidException e, 
             HttpServletRequest request) {
         log.info("[Exception] Validation Error: {}", e.getMessage());
@@ -38,24 +39,42 @@ public class ClientExceptionHandler extends BaseExceptionHandler {
                 .map(error -> new FieldErrorDetail(error.getField(), error.getDefaultMessage()))
                 .toList();
 
-        return responseError(GlobalError.BAD_REQUEST, request.getRequestURI(), details);
+        return errorInstance(GlobalError.BAD_REQUEST, request.getRequestURI(), details);
     }
 
     /**
      * 잘못된 인자 전달 시 발생하는 예외 처리 (400)
      */
     @ExceptionHandler(IllegalArgumentException.class)
-    private ResponseEntity<ApiError> handleIllegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
+    private ApiError handleIllegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
         log.info("[Exception] Illegal Argument Exception: {}", e.getMessage());
-        return responseError(GlobalError.BAD_REQUEST, request.getRequestURI(), e.getMessage());
+        return errorInstance(GlobalError.BAD_REQUEST, request.getRequestURI(), e.getMessage());
     }
 
     /**
      * 잘못된 프로퍼티 참조 시 발생하는 예외 처리 (400)
      */
     @ExceptionHandler(PropertyReferenceException.class)
-    private ResponseEntity<ApiError> handlePropertyReferenceException(PropertyReferenceException e, HttpServletRequest request) {
+    private ApiError handlePropertyReferenceException(PropertyReferenceException e, HttpServletRequest request) {
         log.info("[Exception] Property Reference Exception: {}", e.getMessage());
-        return responseError(GlobalError.BAD_REQUEST, request.getRequestURI(), e.getMessage());
+        return errorInstance(GlobalError.BAD_REQUEST, request.getRequestURI(), e.getMessage());
+    }
+    
+    /**
+     * 인증 예외 처리 (401)
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    private ApiError handleAuthenticationException(AuthenticationException e, HttpServletRequest request) {
+        log.warn("[Exception] Authentication Exception: {}", e.getMessage());
+        return errorInstance(GlobalError.UNAUTHORIZED, request.getRequestURI(), e.getMessage());
+    }
+    
+    /**
+     * 보안 권한 예외 처리 (403)
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    private ApiError handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
+        log.warn("[Exception] Access Denied Exception: {}", e.getMessage());
+        return errorInstance(GlobalError.FORBIDDEN, request.getRequestURI(), e.getMessage());
     }
 }
