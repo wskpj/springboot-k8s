@@ -20,11 +20,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.example.springboot_app.domain.auth.annotations.AuthAdmin;
 import com.example.springboot_app.domain.auth.annotations.AuthPublic;
-import com.example.springboot_app.global.resolver.AuthAnnotationResolver;
 import com.example.springboot_app.global.security.JwtAuthenticationFilter;
 import com.example.springboot_app.global.security.JwtProvider;
 import com.example.springboot_app.global.security.handler.CustomAccessDeniedHandler;
 import com.example.springboot_app.global.security.handler.CustomAuthenticationEntryPoint;
+import com.example.springboot_app.global.security.resolver.AuthAnnotationResolver;
 
 import lombok.RequiredArgsConstructor;
 

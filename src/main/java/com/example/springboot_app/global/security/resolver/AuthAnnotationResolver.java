@@ -1,4 +1,4 @@
-package com.example.springboot_app.global.resolver;
+package com.example.springboot_app.global.security.resolver;
 
 import java.lang.annotation.Annotation;
 

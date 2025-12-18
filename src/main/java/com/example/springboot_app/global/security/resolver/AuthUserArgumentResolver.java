@@ -1,4 +1,4 @@
-package com.example.springboot_app.global.resolver;
+package com.example.springboot_app.global.security.resolver;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.context.SecurityContextHolder;
