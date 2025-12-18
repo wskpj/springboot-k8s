@@ -23,7 +23,7 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
      */
     @ExceptionHandler(BusinessException.class)
     private ApiError handleBusinessException(BusinessException e, HttpServletRequest request) {
-        log.warn("[Exception] Business Exception {}", e.getMessage());
+        log.warn("[Exception] Business Exception: {}", e.getMessage());
         return errorInstance(e.getErrorType(), request.getRequestURI(), e.getDetails());
     }
     
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
      */
     @ExceptionHandler(SystemException.class)
     private ApiError handleSystemException(SystemException e, HttpServletRequest request) {
-        log.error("[Exception] System Exception {}", e.getMessage());
+        log.error("[Exception] System Exception: {}", e.getMessage());
         return errorInstance(e.getErrorType(), request.getRequestURI(), e.getDetails());
     }
 
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
      */
     @ExceptionHandler(InfrastructureException.class)
     private ApiError handleInfrastructureException(InfrastructureException e, HttpServletRequest request) {
-        log.error("[Exception] Infrastructure Exception {}", e.getMessage());
+        log.error("[Exception] Infrastructure Exception: {}", e.getMessage());
         return errorInstance(e.getErrorType(), request.getRequestURI(), e.getDetails());
     }
 
