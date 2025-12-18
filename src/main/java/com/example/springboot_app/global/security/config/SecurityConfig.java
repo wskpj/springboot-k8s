@@ -1,4 +1,4 @@
-package com.example.springboot_app.global.config;
+package com.example.springboot_app.global.security.config;   
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,15 +20,16 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.example.springboot_app.domain.auth.annotations.AuthAdmin;
 import com.example.springboot_app.domain.auth.annotations.AuthPublic;
+import com.example.springboot_app.global.bean.ApiGenerator;
+import com.example.springboot_app.global.redis.repository.GlobalRedisRepository;
+import com.example.springboot_app.global.redis.service.RedisStringService;
+import com.example.springboot_app.global.security.GlobalRateLimitFilter;
 import com.example.springboot_app.global.security.JwtAuthenticationFilter;
 import com.example.springboot_app.global.security.JwtProvider;
-import com.example.springboot_app.global.security.GlobalRateLimitFilter;
 import com.example.springboot_app.global.security.handler.CustomAccessDeniedHandler;
 import com.example.springboot_app.global.security.handler.CustomAuthenticationEntryPoint;
-import com.example.springboot_app.global.security.resolver.AuthAnnotationResolver;
-import com.example.springboot_app.global.bean.ApiGenerator;
-import com.example.springboot_app.global.redis.service.RedisStringService;
 import com.example.springboot_app.global.security.policy.RateLimitPolicy;
+import com.example.springboot_app.global.security.resolver.AuthAnnotationResolver;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,6 +42,7 @@ public class SecurityConfig {
     private final AuthAnnotationResolver authResolver;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final GlobalRedisRepository globalRedisRepository;
     private final RedisStringService redisStringService;
     private final ApiGenerator apiGenerator;
     private final List<RateLimitPolicy> rateLimitPolicies;
@@ -74,7 +76,7 @@ public class SecurityConfig {
                     .accessDeniedHandler(accessDeniedHandler)
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(new GlobalRateLimitFilter(redisStringService, apiGenerator, rateLimitPolicies), JwtAuthenticationFilter.class);
+            .addFilterAfter(new GlobalRateLimitFilter(globalRedisRepository, redisStringService, apiGenerator, rateLimitPolicies), JwtAuthenticationFilter.class);
 
         return http.build();
     }
