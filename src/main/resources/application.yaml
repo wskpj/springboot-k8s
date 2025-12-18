@@ -5,6 +5,10 @@ spring:
   application:
     name: springboot-app
   
+  output:
+    ansi:
+      enabled: always
+  
   datasource:
     url: ${DB_URL}
     driver-class-name: ${DB_DRIVER}
