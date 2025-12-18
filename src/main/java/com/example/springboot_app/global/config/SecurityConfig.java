@@ -28,6 +28,7 @@ import com.example.springboot_app.global.security.handler.CustomAuthenticationEn
 import com.example.springboot_app.global.security.resolver.AuthAnnotationResolver;
 import com.example.springboot_app.global.bean.ApiGenerator;
 import com.example.springboot_app.global.redis.service.RedisStringService;
+import com.example.springboot_app.global.security.policy.RateLimitPolicy;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,6 +43,7 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final RedisStringService redisStringService;
     private final ApiGenerator apiGenerator;
+    private final List<RateLimitPolicy> rateLimitPolicies;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -72,7 +74,7 @@ public class SecurityConfig {
                     .accessDeniedHandler(accessDeniedHandler)
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(new GlobalRateLimitFilter(redisStringService, apiGenerator), JwtAuthenticationFilter.class);
+            .addFilterAfter(new GlobalRateLimitFilter(redisStringService, apiGenerator, rateLimitPolicies), JwtAuthenticationFilter.class);
 
         return http.build();
     }

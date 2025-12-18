@@ -1,6 +1,7 @@
 package com.example.springboot_app.global.security;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,6 +13,7 @@ import com.example.springboot_app.global.redis.dto.KeyBinding;
 import com.example.springboot_app.global.redis.enums.RedisStringKey;
 import com.example.springboot_app.global.redis.service.RedisStringService;
 import com.example.springboot_app.global.response.types.ApiError;
+import com.example.springboot_app.global.security.policy.RateLimitPolicy;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,20 +24,23 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GlobalRateLimitFilter extends OncePerRequestFilter {
 
-    private static final String AUTH_PATH_PREFIX = "/api/v1/auth";
-    private static final int GLOBAL_LIMIT = 500;
-    private static final int AUTH_LIMIT = 10;
-    private static final long DURATION = 60L;
-
     private final RedisStringService redisStringService;
     private final ApiGenerator apiGenerator;
+    private final List<RateLimitPolicy> policies;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         
-        // 1. 요청 URI에 따른 차등 제한 수치 결정 (인증 경로는 더 엄격하게)
+        // 1. 전략 패턴을 사용하여 현재 요청에 맞는 정책 선택
+        // TODO: filter에서 던지는 예외에도 응답 형식 규격화 고려
+        RateLimitPolicy policy = policies.stream()
+                .filter(p -> p.supports(request))
+                .findFirst()
+                .orElseThrow(() -> new ServletException("No rate limit policy found"));
+
+        int limit = policy.getLimit();
+        long duration = policy.getDuration();
         String requestUri = request.getRequestURI();
-        int limit = requestUri.startsWith(AUTH_PATH_PREFIX) ? AUTH_LIMIT : GLOBAL_LIMIT;
 
         // 2. 클라이언트 식별자 추출 (로그인 유저는 ID, 아니면 IP)
         String identifier = getClientIdentifier(request);
@@ -44,9 +49,9 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
         KeyBinding<RedisStringKey> key = RedisStringKey.RATE_LIMIT.bind(identifier, requestUri);
         Long count = redisStringService.increment(key);
         
-        // 4. 최초 요청 시 만료 시간(1분) 설정
+        // 4. 최초 요청 시 만료 시간 설정
         if (count != null && count == 1) {
-            redisStringService.expire(key, DURATION);
+            redisStringService.expire(key, duration);
         }
         
         // 5. 헤더에 Rate Limit 정보 추가
@@ -55,7 +60,7 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
         
         response.setHeader("X-RateLimit-Limit", String.valueOf(limit));
         response.setHeader("X-RateLimit-Remaining", String.valueOf(remaining));
-        response.setHeader("X-RateLimit-Reset", String.valueOf(reset > 0 ? reset : DURATION));
+        response.setHeader("X-RateLimit-Reset", String.valueOf(reset > 0 ? reset : duration));
 
         // 6. 제한 수치 초과 시 에러 응답 및 요청 차단
         if (count != null && count > limit) {
@@ -68,23 +73,17 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    /**
-     * 클라이언트를 식별하기 위한 고유 키를 추출합니다.
-     * 로그인된 사용자는 User ID를, 비로그인 사용자는 IP 주소를 사용합니다.
-     */
     private String getClientIdentifier(HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
-        // 시큐리티 컨텍스트에 인증 정보가 있는 경우
         if (authentication != null && authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof AuthUser authUser) {
-                return String.valueOf(authUser.getId()); // 사용자 PK 사용
+                return String.valueOf(authUser.getId());
             }
             return authentication.getName();
         }
         
-        // 비로그인 사용자인 경우 IP 주소 사용 (프록시 고려)
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
