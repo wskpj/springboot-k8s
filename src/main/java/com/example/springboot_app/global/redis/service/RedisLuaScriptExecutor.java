@@ -33,7 +33,7 @@ public class RedisLuaScriptExecutor {
         return redisTemplate.execute(
                 redisScript,
                 bindings.stream().map(KeyBinding::key).toList(),
-                values.toArray());
+                values.stream().map(String::valueOf).toArray());
     }
 
     public <T> T execute(RedisLuaScript script, KeyBinding<?> binding, Object... values) {
