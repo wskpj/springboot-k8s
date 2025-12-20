@@ -15,7 +15,7 @@ import com.example.springboot_app.domain.user.entity.User;
 import com.example.springboot_app.domain.user.entity.UserRole;
 import com.example.springboot_app.domain.user.exception.UserException;
 import com.example.springboot_app.domain.user.repository.UserRepository;
-import com.example.springboot_app.global.security.JwtProvider;
+import com.example.springboot_app.infrastructure.security.bean.JwtProvider;
 
 import lombok.RequiredArgsConstructor;
 

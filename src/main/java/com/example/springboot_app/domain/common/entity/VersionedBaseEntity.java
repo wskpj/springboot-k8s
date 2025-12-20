@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @Getter
 @MappedSuperclass
+@Deprecated
 public abstract class VersionedBaseEntity extends BaseEntity {
 
     @Version

@@ -7,7 +7,7 @@ import com.example.springboot_app.domain.coupon.entity.Coupon;
 import com.example.springboot_app.domain.coupon.exception.CouponException;
 import com.example.springboot_app.domain.coupon.repository.CouponRepository;
 import com.example.springboot_app.domain.coupon.service.CouponService;
-import com.example.springboot_app.global.security.AuthUser;
+import com.example.springboot_app.infrastructure.security.dto.AuthUser;
 
 import lombok.RequiredArgsConstructor;
 

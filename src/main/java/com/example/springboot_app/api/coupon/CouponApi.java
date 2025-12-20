@@ -1,15 +1,16 @@
 package com.example.springboot_app.api.coupon;
 
-import com.example.springboot_app.api.coupon.dto.CouponResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.example.springboot_app.api.coupon.dto.CouponResponse;
 import com.example.springboot_app.domain.auth.annotations.AuthPublic;
-import com.example.springboot_app.global.security.AuthUser;
+import com.example.springboot_app.infrastructure.security.dto.AuthUser;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Coupon", description = "Coupon Management APIs")
 @RequestMapping("/api/v1/coupons")

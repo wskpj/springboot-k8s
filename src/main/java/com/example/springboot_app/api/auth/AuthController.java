@@ -9,7 +9,7 @@ import com.example.springboot_app.api.auth.dto.AuthResponse;
 import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.auth.exception.AuthException;
 import com.example.springboot_app.domain.auth.service.AuthService;
-import com.example.springboot_app.global.security.AuthUser;
+import com.example.springboot_app.infrastructure.security.dto.AuthUser;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

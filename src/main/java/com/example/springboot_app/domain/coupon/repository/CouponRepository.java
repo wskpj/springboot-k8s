@@ -1,12 +1,16 @@
 package com.example.springboot_app.domain.coupon.repository;
 
-import com.example.springboot_app.domain.coupon.entity.Coupon;
-import jakarta.persistence.LockModeType;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import com.example.springboot_app.domain.coupon.entity.Coupon;
+
+import jakarta.persistence.LockModeType;
 
 public interface CouponRepository extends JpaRepository<Coupon, Long> {
 
@@ -14,8 +18,8 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
     @Query("select c from Coupon c where c.id = :id")
     Optional<Coupon> findByIdWithPessimisticLock(Long id);
 
-    @org.springframework.data.jpa.repository.Modifying
-    @org.springframework.transaction.annotation.Transactional
+    @Modifying
+    @Transactional
     @Query("update Coupon c set c.remainingQuantity = :remainingQuantity where c.id = :id")
     void updateRemainingQuantity(Long id, Integer remainingQuantity);
 }

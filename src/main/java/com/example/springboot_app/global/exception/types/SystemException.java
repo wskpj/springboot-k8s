@@ -1,17 +1,52 @@
 package com.example.springboot_app.global.exception.types;
 
-import com.example.springboot_app.global.exception.enums.ErrorType;
+import com.example.springboot_app.global.exception.enums.GlobalError;
+import com.example.springboot_app.global.exception.types.base.SystemBaseException;
 
-/**
- * 일반적인 시스템 예외 (예: 예상치 못한 널 포인트 예외 등)
- * 로그 레벨: ERROR
- */
-public class SystemException extends BaseException {
-    public SystemException(ErrorType errorType) {
-        super(errorType);
+public class SystemException {
+
+
+    public static class Server extends SystemBaseException {
+        public Server() {
+            // TODO: Server 에러 코드 정의 또는 구체화
+            super(GlobalError.INTERNAL_SERVER_ERROR);
+        }
+
+        public Server(Object details) {
+            super(GlobalError.INTERNAL_SERVER_ERROR, details);
+        }
     }
 
-    public SystemException(ErrorType errorType, Object details) {
-        super(errorType, details);
+    public static class Database extends SystemBaseException {
+        public Database() {
+            // TODO: Database 에러 코드 정의 또는 구체화
+            super(GlobalError.INTERNAL_SERVER_ERROR);
+        }
+
+        public Database(Object details) {
+            super(GlobalError.INTERNAL_SERVER_ERROR, details);
+        }
+    }
+
+    public static class Redis extends SystemBaseException {
+        public Redis() {
+            // TODO: Redis 에러 코드 정의 또는 구체화
+            super(GlobalError.INTERNAL_SERVER_ERROR);
+        }
+
+        public Redis(Object details) {
+            super(GlobalError.INTERNAL_SERVER_ERROR, details);
+        }
+    }
+
+    public static class Infrastructure extends SystemBaseException {
+        public Infrastructure() {
+            // TODO: Infrastructure 에러 코드 정의 또는 구체화
+            super(GlobalError.INTERNAL_SERVER_ERROR);
+        }
+
+        public Infrastructure(Object details) {
+            super(GlobalError.INTERNAL_SERVER_ERROR, details);
+        }
     }
 }

@@ -12,7 +12,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
 
 import com.example.springboot_app.domain.auth.annotations.AuthSelf;
-import com.example.springboot_app.global.security.AuthUser;
+import com.example.springboot_app.infrastructure.security.dto.AuthUser;
 
 import jakarta.servlet.http.HttpServletRequest;
 

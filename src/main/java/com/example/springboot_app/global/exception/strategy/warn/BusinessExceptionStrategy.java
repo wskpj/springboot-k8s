@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.example.springboot_app.global.exception.enums.GlobalError;
 import com.example.springboot_app.global.exception.strategy.ExceptionHandleStrategy;
-import com.example.springboot_app.global.exception.types.BaseException;
-import com.example.springboot_app.global.exception.types.BusinessException;
+import com.example.springboot_app.global.exception.types.base.BaseException;
+import com.example.springboot_app.global.exception.types.base.BusinessBaseException;
 import com.example.springboot_app.global.response.types.ApiError;
 
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class BusinessExceptionStrategy implements ExceptionHandleStrategy<Except
     public boolean supports(Exception e) {
         return e instanceof AuthenticationException ||
                e instanceof AccessDeniedException ||
-               e instanceof BusinessException;
+               e instanceof BusinessBaseException;
     }
 
     @Override

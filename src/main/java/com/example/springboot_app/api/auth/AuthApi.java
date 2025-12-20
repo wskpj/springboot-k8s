@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
 import com.example.springboot_app.domain.auth.annotations.AuthPublic;
-import com.example.springboot_app.global.security.AuthUser;
+import com.example.springboot_app.infrastructure.security.dto.AuthUser;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
