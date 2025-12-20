@@ -5,12 +5,15 @@ import java.util.Set;
 
 import org.springframework.stereotype.Repository;
 
+import com.example.springboot_app.global.redis.annotation.LuaExecute;
 import com.example.springboot_app.global.redis.dto.KeyBinding;
 import com.example.springboot_app.global.redis.dto.ValueBinding;
 import com.example.springboot_app.global.redis.enums.RedisListKey;
+import com.example.springboot_app.global.redis.enums.RedisLuaScript;
 import com.example.springboot_app.global.redis.enums.RedisSetKey;
 import com.example.springboot_app.global.redis.enums.RedisStringKey;
 import com.example.springboot_app.global.redis.service.RedisListService;
+import com.example.springboot_app.global.redis.service.RedisLuaScriptExecutor;
 import com.example.springboot_app.global.redis.service.RedisSetService;
 import com.example.springboot_app.global.redis.service.RedisStringService;
 
@@ -23,6 +26,22 @@ public class CouponRedisRepository {
     private final RedisStringService redisStringService;
     private final RedisSetService redisSetService;
     private final RedisListService redisListService;
+    private final RedisLuaScriptExecutor scriptExecutor;
+
+    @LuaExecute
+    public Long issueCoupon(Long couponId, Long userId) {
+        // 1. Bind keys
+        KeyBinding<RedisStringKey> stockKey = RedisStringKey.COUPON_STOCK.bind(couponId);
+        KeyBinding<RedisSetKey> userSetKey = RedisSetKey.COUPON_ISSUED_USERS.bind(couponId);
+        KeyBinding<RedisListKey> queueKey = RedisListKey.COUPON_ISSUE_QUEUE.bind();
+        KeyBinding<RedisSetKey> syncKey = RedisSetKey.COUPON_SYNC_IDS.bind();
+
+        // 2. Execute script
+        return scriptExecutor.execute(
+                RedisLuaScript.COUPON_ISSUE,
+                List.of(stockKey, userSetKey, queueKey, syncKey),
+                List.of(userId, couponId));
+    }
 
     public boolean initializeStock(Long couponId, int quantity) {
         KeyBinding<RedisStringKey> key = RedisStringKey.COUPON_STOCK.bind(couponId);

@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum RedisLuaScript {
-    RATE_LIMIT("rate_limit.lua", Long.class);
+    RATE_LIMIT("rate_limit.lua", Long.class),
+    COUPON_ISSUE("coupon_issue.lua", Long.class);
 
     private final String fileName;
     private final Class<?> resultType;
