@@ -7,13 +7,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.springboot_app.global.bean.ApiGenerator;
-import com.example.springboot_app.global.exception.enums.GlobalError;
+import com.example.springboot_app.global.exception.types.RateLimitException;
 import com.example.springboot_app.global.redis.dto.KeyBinding;
 import com.example.springboot_app.global.redis.enums.RedisStringKey;
 import com.example.springboot_app.global.redis.repository.GlobalRedisRepository;
 import com.example.springboot_app.global.redis.service.RedisStringService;
-import com.example.springboot_app.global.response.types.ApiError;
 import com.example.springboot_app.global.security.policy.RateLimitPolicy;
 
 import jakarta.servlet.FilterChain;
@@ -27,14 +25,12 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
 
     private final GlobalRedisRepository globalRedisRepository;
     private final RedisStringService redisStringService;
-    private final ApiGenerator apiGenerator;
     private final List<RateLimitPolicy> policies;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         
         // 1. 전략 패턴을 사용하여 현재 요청에 맞는 정책 선택
-        // TODO: filter에서 던지는 예외에도 응답 형식 규격화 고려
         RateLimitPolicy policy = policies.stream()
                 .filter(p -> p.supports(request))
                 .findFirst()
@@ -53,7 +49,7 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
         // 5. 헤더에 Rate Limit 정보 추가
         long remaining = count != null ? Math.max(0, limit - count) : 0;
         
-        // TTL은 여전히 RedisStringService를 통해 조회 가능 (KeyBinding 재사용)
+        // TTL은 여전히 RedisStringService를 통해 조회 가능
         KeyBinding<RedisStringKey> key = RedisStringKey.RATE_LIMIT.bind(identifier, requestUri);
         long reset = redisStringService.getExpire(key);
         
@@ -63,9 +59,7 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
 
         // 6. 제한 수치 초과 시 에러 응답 및 요청 차단
         if (count != null && count > limit) {
-            ApiError error = ApiError.of(GlobalError.TOO_MANY_REQUESTS, requestUri, "Rate limit exceeded. Try again later.");
-            apiGenerator.writeStream(error, response);
-            return;
+            throw new RateLimitException("Rate limit exceeded. Try again later.");
         }
 
         // 7. 제한 통과 시 다음 필터로 진행

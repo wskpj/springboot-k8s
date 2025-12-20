@@ -1,4 +1,4 @@
-package com.example.springboot_app.global.security.config;   
+package com.example.springboot_app.global.security.config;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +21,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.example.springboot_app.domain.auth.annotations.AuthAdmin;
 import com.example.springboot_app.domain.auth.annotations.AuthPublic;
 import com.example.springboot_app.global.bean.ApiGenerator;
+import com.example.springboot_app.global.exception.dispatcher.ErrorResponseDispatcher;
+import com.example.springboot_app.global.filter.handler.FilterExceptionHandlingFilter;
 import com.example.springboot_app.global.redis.repository.GlobalRedisRepository;
 import com.example.springboot_app.global.redis.service.RedisStringService;
 import com.example.springboot_app.global.security.GlobalRateLimitFilter;
@@ -46,6 +48,7 @@ public class SecurityConfig {
     private final RedisStringService redisStringService;
     private final ApiGenerator apiGenerator;
     private final List<RateLimitPolicy> rateLimitPolicies;
+    private final ErrorResponseDispatcher errorResponseDispatcher;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -75,8 +78,12 @@ public class SecurityConfig {
                     .authenticationEntryPoint(authenticationEntryPoint)
                     .accessDeniedHandler(accessDeniedHandler)
             )
+            // 1. 필터 계층 통합 예외 처리 필터
+            .addFilterBefore(new FilterExceptionHandlingFilter(errorResponseDispatcher, apiGenerator), UsernamePasswordAuthenticationFilter.class)
+            // 2. JWT 필터
             .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(new GlobalRateLimitFilter(globalRedisRepository, redisStringService, apiGenerator, rateLimitPolicies), JwtAuthenticationFilter.class);
+            // 3. Rate Limit 필터
+            .addFilterAfter(new GlobalRateLimitFilter(globalRedisRepository, redisStringService, rateLimitPolicies), JwtAuthenticationFilter.class);
 
         return http.build();
     }
