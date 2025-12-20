@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.example.springboot_app.global.exception.strategy.DefaultExceptionStrategy;
 import com.example.springboot_app.global.exception.strategy.ExceptionHandleStrategy;
-import com.example.springboot_app.global.exception.strategy.error.DefaultExceptionStrategy;
 import com.example.springboot_app.global.response.types.ApiError;
 
 import jakarta.servlet.http.HttpServletRequest;

@@ -4,10 +4,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.springboot_app.api.coupon.dto.CouponResponse;
 import com.example.springboot_app.domain.coupon.entity.Coupon;
+import com.example.springboot_app.domain.coupon.exception.CouponException;
 import com.example.springboot_app.domain.coupon.repository.CouponRepository;
 import com.example.springboot_app.domain.coupon.service.CouponService;
-import com.example.springboot_app.global.exception.enums.BusinessError;
-import com.example.springboot_app.global.exception.types.BusinessException;
 import com.example.springboot_app.global.security.AuthUser;
 
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,7 @@ public class CouponController implements CouponApi {
     @Override
     public CouponResponse.Stock getStock(Long id) {
         Coupon coupon = couponRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(BusinessError.COUPON_NOT_FOUND));
+                .orElseThrow(() -> new CouponException.NotFound(id));
         return new CouponResponse.Stock(coupon.getId(), coupon.getRemainingQuantity());
     }
 }

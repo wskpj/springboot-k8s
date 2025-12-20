@@ -3,8 +3,8 @@ package com.example.springboot_app.global.exception.types;
 import com.example.springboot_app.global.exception.enums.ErrorType;
 
 /**
- * 외부 인프라 서비스 관련 예외 (예: Redis 서버 장애, DB 커넥션 오류)
- * 로그 레벨: ERROR (긴급 알림 대상)
+ * 데이터베이스, 외부 API, 파일 시스템 등 인프라스트럭처 수준의 예외
+ * 로그 레벨: ERROR
  */
 public class InfrastructureException extends BaseException {
     public InfrastructureException(ErrorType errorType) {
