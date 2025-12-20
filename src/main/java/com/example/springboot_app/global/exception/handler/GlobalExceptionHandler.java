@@ -1,21 +1,14 @@
 package com.example.springboot_app.global.exception.handler;
 
-import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.example.springboot_app.global.exception.types.BusinessException;
-import com.example.springboot_app.global.exception.types.InfrastructureException;
-import com.example.springboot_app.global.exception.types.SystemException;
-import com.example.springboot_app.global.response.dispatcher.ErrorResponseDispatcher;
+import com.example.springboot_app.global.exception.dispatcher.ErrorResponseDispatcher;
 import com.example.springboot_app.global.response.types.ApiError;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-@Order(2)
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler extends BaseExceptionHandler {
@@ -23,38 +16,11 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
     private final ErrorResponseDispatcher dispatcher;
 
     /**
-     * 비즈니스 로직 예외 처리 (500)
-     */
-    @ExceptionHandler(BusinessException.class)
-    private ApiError handleBusinessException(BusinessException e, HttpServletRequest request) {
-        log.warn("[Exception] Business Exception: {}", e.getMessage());
-        return dispatcher.dispatch(e, request.getRequestURI());
-    }
-    
-    /**
-     * 시스템 예외 처리 (500)
-     */
-    @ExceptionHandler(SystemException.class)
-    private ApiError handleSystemException(SystemException e, HttpServletRequest request) {
-        log.error("[Exception] System Exception: {}", e.getMessage());
-        return dispatcher.dispatch(e, request.getRequestURI());
-    }
-
-    /**
-     * 인프라 예외 처리 (500)
-     */
-    @ExceptionHandler(InfrastructureException.class)
-    private ApiError handleInfrastructureException(InfrastructureException e, HttpServletRequest request) {
-        log.error("[Exception] Infrastructure Exception: {}", e.getMessage());
-        return dispatcher.dispatch(e, request.getRequestURI());
-    }
-
-    /**
-     * 예상치 못한 예외 Fallback (500)
+     * 모든 예외를 통합 처리
+     * 상세 처리 및 로깅은 ErrorResponseDispatcher 및 각 전략에서 수행함
      */
     @ExceptionHandler(Exception.class)
-    private ApiError handleException(Exception e, HttpServletRequest request) {
-        log.error("[Exception] Unhandled Exception: {}", e.getMessage());
-        return dispatcher.dispatch(e, request.getRequestURI());
+    public ApiError handleAllException(Exception e, HttpServletRequest request) {
+        return dispatcher.dispatch(e, request);
     }
 }

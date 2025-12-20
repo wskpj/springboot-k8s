@@ -16,4 +16,9 @@ public interface ExceptionHandleStrategy<E extends Exception> {
      * 예외를 처리하여 규격화된 ApiError 반환
      */
     ApiError handle(E e, String path);
+
+    /**
+     * 에러 메시지 로깅
+     */
+    void log(E e, String path);
 }
