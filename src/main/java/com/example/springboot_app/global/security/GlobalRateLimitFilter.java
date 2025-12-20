@@ -11,6 +11,7 @@ import com.example.springboot_app.global.bean.ApiGenerator;
 import com.example.springboot_app.global.exception.enums.GlobalError;
 import com.example.springboot_app.global.redis.dto.KeyBinding;
 import com.example.springboot_app.global.redis.enums.RedisStringKey;
+import com.example.springboot_app.global.redis.repository.GlobalRedisRepository;
 import com.example.springboot_app.global.redis.service.RedisStringService;
 import com.example.springboot_app.global.response.types.ApiError;
 import com.example.springboot_app.global.security.policy.RateLimitPolicy;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GlobalRateLimitFilter extends OncePerRequestFilter {
 
+    private final GlobalRedisRepository globalRedisRepository;
     private final RedisStringService redisStringService;
     private final ApiGenerator apiGenerator;
     private final List<RateLimitPolicy> policies;
@@ -45,17 +47,14 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
         // 2. 클라이언트 식별자 추출 (로그인 유저는 ID, 아니면 IP)
         String identifier = getClientIdentifier(request);
         
-        // 3. Redis 키 생성 및 카운트 증가 (Atomic 연산)
-        KeyBinding<RedisStringKey> key = RedisStringKey.RATE_LIMIT.bind(identifier, requestUri);
-        Long count = redisStringService.increment(key);
-        
-        // 4. 최초 요청 시 만료 시간 설정
-        if (count != null && count == 1) {
-            redisStringService.expire(key, duration);
-        }
+        // 3. Redis 키 생성 및 카운트 증가 (Repository를 통한 루아 스크립트 실행)
+        Long count = globalRedisRepository.checkAndIncrementRateLimit(identifier, requestUri, duration);
         
         // 5. 헤더에 Rate Limit 정보 추가
         long remaining = count != null ? Math.max(0, limit - count) : 0;
+        
+        // TTL은 여전히 RedisStringService를 통해 조회 가능 (KeyBinding 재사용)
+        KeyBinding<RedisStringKey> key = RedisStringKey.RATE_LIMIT.bind(identifier, requestUri);
         long reset = redisStringService.getExpire(key);
         
         response.setHeader("X-RateLimit-Limit", String.valueOf(limit));

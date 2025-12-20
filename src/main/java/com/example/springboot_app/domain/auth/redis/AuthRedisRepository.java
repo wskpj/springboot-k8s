@@ -2,10 +2,13 @@ package com.example.springboot_app.domain.auth.redis;
 
 import org.springframework.stereotype.Repository;
 
+import com.example.springboot_app.global.redis.annotation.LuaExecute;
 import com.example.springboot_app.global.redis.dto.KeyBinding;
 import com.example.springboot_app.global.redis.dto.ValueBinding;
+import com.example.springboot_app.global.redis.enums.RedisLuaScript;
 import com.example.springboot_app.global.redis.enums.RedisSetKey;
 import com.example.springboot_app.global.redis.enums.RedisStringKey;
+import com.example.springboot_app.global.redis.service.RedisLuaScriptExecutor;
 import com.example.springboot_app.global.redis.service.RedisSetService;
 import com.example.springboot_app.global.redis.service.RedisStringService;
 
@@ -17,10 +20,11 @@ public class AuthRedisRepository {
 
     private final RedisSetService redisSetService;
     private final RedisStringService redisStringService;
+    private final RedisLuaScriptExecutor scriptExecutor;
 
     public void addRefreshToken(Long userId, String refreshToken, long ttlSeconds) {
         KeyBinding<RedisSetKey> key = RedisSetKey.REFRESH_TOKENS.bind(userId);
-        ValueBinding value = ValueBinding.of(refreshToken);        
+        ValueBinding value = ValueBinding.of(refreshToken);
         redisSetService.add(key, value);
         redisSetService.expire(key, ttlSeconds);
     }
@@ -42,13 +46,16 @@ public class AuthRedisRepository {
         redisSetService.delete(key);
     }
 
-    public long incrementLoginFailCount(String email, long lockDurationSeconds) {
+    @LuaExecute
+    public Long incrementLoginFailCount(String email, long lockDurationSeconds) {
+        // 1. Bind key
         KeyBinding<RedisStringKey> key = RedisStringKey.LOGIN_FAIL_COUNT.bind(email);
-        Long count = redisStringService.increment(key);
-        if (count != null && count == 1) {
-            redisStringService.expire(key, lockDurationSeconds);
-        }
-        return count != null ? count : 0;
+
+        // 2. Execute script
+        return scriptExecutor.execute(
+                RedisLuaScript.RATE_LIMIT,
+                key,
+                lockDurationSeconds);
     }
 
     public int getLoginFailCount(String email) {
