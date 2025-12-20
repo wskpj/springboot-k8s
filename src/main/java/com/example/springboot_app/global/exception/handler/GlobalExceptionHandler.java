@@ -4,19 +4,23 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.example.springboot_app.global.exception.enums.GlobalError;
 import com.example.springboot_app.global.exception.types.BusinessException;
 import com.example.springboot_app.global.exception.types.InfrastructureException;
 import com.example.springboot_app.global.exception.types.SystemException;
+import com.example.springboot_app.global.response.dispatcher.ErrorResponseDispatcher;
 import com.example.springboot_app.global.response.types.ApiError;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Order(2)
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler extends BaseExceptionHandler {
+
+    private final ErrorResponseDispatcher dispatcher;
 
     /**
      * 비즈니스 로직 예외 처리 (500)
@@ -24,7 +28,7 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     private ApiError handleBusinessException(BusinessException e, HttpServletRequest request) {
         log.warn("[Exception] Business Exception: {}", e.getMessage());
-        return errorInstance(e.getErrorType(), request.getRequestURI(), e.getDetails());
+        return dispatcher.dispatch(e, request.getRequestURI());
     }
     
     /**
@@ -33,7 +37,7 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
     @ExceptionHandler(SystemException.class)
     private ApiError handleSystemException(SystemException e, HttpServletRequest request) {
         log.error("[Exception] System Exception: {}", e.getMessage());
-        return errorInstance(e.getErrorType(), request.getRequestURI(), e.getDetails());
+        return dispatcher.dispatch(e, request.getRequestURI());
     }
 
     /**
@@ -42,7 +46,7 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
     @ExceptionHandler(InfrastructureException.class)
     private ApiError handleInfrastructureException(InfrastructureException e, HttpServletRequest request) {
         log.error("[Exception] Infrastructure Exception: {}", e.getMessage());
-        return errorInstance(e.getErrorType(), request.getRequestURI(), e.getDetails());
+        return dispatcher.dispatch(e, request.getRequestURI());
     }
 
     /**
@@ -51,6 +55,6 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
     @ExceptionHandler(Exception.class)
     private ApiError handleException(Exception e, HttpServletRequest request) {
         log.error("[Exception] Unhandled Exception: {}", e.getMessage());
-        return errorInstance(GlobalError.INTERNAL_SERVER_ERROR, request.getRequestURI(), e.getMessage());
+        return dispatcher.dispatch(e, request.getRequestURI());
     }
 }
