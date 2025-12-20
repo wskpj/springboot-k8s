@@ -19,10 +19,6 @@ RUN --mount=type=cache,target=/root/.gradle \
 # 실행 권한 부여
 RUN chmod +x ./gradlew
 
-# Gradle 바이너리 & 의존성 라이브러리 캐싱
-RUN --mount=type=cache,target=/root/.gradle \
-    ./gradlew dependencies --no-daemon
-
 # 소스 코드 복사
 COPY src src
 
