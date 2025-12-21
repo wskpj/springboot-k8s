@@ -24,7 +24,7 @@ COPY src src
 
 # 프로젝트 빌드 (테스트 생략)
 RUN --mount=type=cache,target=/root/.gradle \
-    ./gradlew bootJar -x test --no-daemon --build-cache
+    ./gradlew bootJar -x test --no-daemon
 
 # 레이어 추출
 # 생성된 JAR 파일을 4개의 계층으로 분리
