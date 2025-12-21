@@ -5,7 +5,7 @@
 
     <!-- 프로퍼티 설정 -->
     <property name="LOG_FILE_PATH" value="./logs" />
-    <property name="CONSOLE_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} [%X{requestId}] - %m%n%wEx" />
+    <property name="CONSOLE_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} [%clr(${HOSTNAME:-localhost}){green}:%clr(${PID:- }){magenta}] %clr([%15.15t]){faint} %clr(---){faint} %clr(%-35.35(%logger{30}:%L)){cyan} %clr(%5p) %clr([%X{requestId}]){faint} %m%n%wEx" />
 
     <!-- [1] Local / Dev 환경: 모든 로그를 Plain Text로 출력 -->
     <springProfile name="!(prod | stage)">
