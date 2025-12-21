@@ -22,19 +22,31 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
 
     public static final String REQUEST_ID_HEADER = "X-Request-ID";
     public static final String MDC_REQUEST_ID_KEY = "requestId";
+    public static final String MDC_CLIENT_IP_KEY = "clientIp";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 1. Get Request ID from header or generate a new one
+        // 1. Get Request ID
         String requestId = request.getHeader(REQUEST_ID_HEADER);
         if (requestId == null || requestId.isBlank()) {
             requestId = UUID.randomUUID().toString();
         }
 
-        // 2. Put request ID to MDC
+        // 2. Extract Client IP (Considering Proxy/L7)
+        String clientIp = request.getHeader("X-Forwarded-For");
+        if (clientIp == null || clientIp.isBlank() || "unknown".equalsIgnoreCase(clientIp)) {
+            clientIp = request.getRemoteAddr();
+        } else {
+            // X-Forwarded-For can contain multiple IPs, the first one is the original client
+            clientIp = clientIp.split(",")[0].trim();
+        }
+
+        // 3. Put to MDC
         MDC.put(MDC_REQUEST_ID_KEY, requestId);
+        MDC.put(MDC_CLIENT_IP_KEY, clientIp);
+        
         request.setAttribute(MDC_REQUEST_ID_KEY, requestId);
         response.setHeader(REQUEST_ID_HEADER, requestId);
 
@@ -42,7 +54,7 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } finally {
-            // 3. Log Request Completed          
+            // 4. Log Request Completed          
             long elapsed = System.currentTimeMillis() - startTime;
             int status = response.getStatus();
             String method = request.getMethod();
@@ -54,8 +66,9 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
                 log.debug("[Request] {} {} - {} ({}ms)", method, uri, status, elapsed);
             }
 
-            // 4. Clear MDC
-            MDC.clear();
+            // 5. Clear MDC
+            MDC.remove(MDC_REQUEST_ID_KEY);
+            MDC.remove(MDC_CLIENT_IP_KEY);
         }
     }
 }

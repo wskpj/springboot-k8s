@@ -22,6 +22,7 @@ import com.example.springboot_app.domain.auth.annotations.AuthAdmin;
 import com.example.springboot_app.domain.auth.annotations.AuthPublic;
 import com.example.springboot_app.global.bean.ApiGenerator;
 import com.example.springboot_app.global.exception.dispatcher.ErrorResponseDispatcher;
+import com.example.springboot_app.global.filter.UserContextMdcFilter;
 import com.example.springboot_app.global.filter.handler.FilterExceptionHandlingFilter;
 import com.example.springboot_app.infrastructure.redis.repository.GlobalRedisRepository;
 import com.example.springboot_app.infrastructure.redis.service.RedisStringService;
@@ -82,8 +83,10 @@ public class SecurityConfig {
             .addFilterBefore(new FilterExceptionHandlingFilter(errorResponseDispatcher, apiGenerator), UsernamePasswordAuthenticationFilter.class)
             // 2. JWT 필터
             .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
-            // 3. Rate Limit 필터
-            .addFilterAfter(new GlobalRateLimitFilter(globalRedisRepository, redisStringService, rateLimitPolicies), JwtAuthenticationFilter.class);
+            // 3. User Context MDC 필터
+            .addFilterAfter(new UserContextMdcFilter(), JwtAuthenticationFilter.class)
+            // 4. Rate Limit 필터
+            .addFilterAfter(new GlobalRateLimitFilter(globalRedisRepository, redisStringService, rateLimitPolicies), UserContextMdcFilter.class);
 
         return http.build();
     }
