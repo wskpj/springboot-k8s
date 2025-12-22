@@ -1,13 +1,17 @@
 package com.example.lib.security.starter.filter;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.example.lib.common.core.context.UserContext;
+import com.example.lib.common.core.context.UserContextHolder;
 import com.example.lib.security.starter.bean.JwtProvider;
 import com.example.lib.security.starter.dto.AuthUser;
 
@@ -19,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * JWT 토큰을 검증하고 인증 정보를 설정하는 필터입니다.
+ * 인증 성공 시 시큐리티 컨텍스트와 도메인 컨텍스트(UserContext)를 모두 설정합니다.
  */
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -29,26 +34,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
-        String token = jwtProvider.resolveToken(request);
+        try {
+            String token = jwtProvider.resolveToken(request);
 
-        if (token != null && jwtProvider.validateToken(token)) {
-            Long userId = jwtProvider.getUserIdFromToken(token);
-            String email = jwtProvider.getEmailFromToken(token);
-            String role = jwtProvider.getRoleFromToken(token);
+            if (token != null && jwtProvider.validateToken(token)) {
+                Long userId = jwtProvider.getUserIdFromToken(token);
+                String email = jwtProvider.getEmailFromToken(token);
+                String role = jwtProvider.getRoleFromToken(token);
 
-            SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role != null ? role : "ROLE_USER");
+                String finalRole = role != null ? role : "ROLE_USER";
+                SimpleGrantedAuthority authority = new SimpleGrantedAuthority(finalRole);
 
-            AuthUser userDetails = new AuthUser(
-                    userId,
+                // 1. Spring Security 컨텍스트 설정 (프레임워크용)
+                AuthUser userDetails = new AuthUser(userId, email, List.of(authority));
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                // 2. 도메인 UserContext 설정 (비즈니스 로직용)
+                UserContext userContext = new UserContext(
+                    String.valueOf(userId),
                     email,
-                    List.of(authority));
+                    Set.of(finalRole),
+                    Collections.emptyMap()
+                );
+                UserContextHolder.setContext(userContext);
+            }
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            filterChain.doFilter(request, response);
+        } finally {
+            // 요청이 끝나면 스레드 로컬 메모리 누수 방지를 위해 컨텍스트를 비움
+            UserContextHolder.clearContext();
         }
-
-        filterChain.doFilter(request, response);
     }
 }

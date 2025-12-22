@@ -1,4 +1,4 @@
-package com.example.lib.web.starter.filter;
+package com.example.lib.logging.starter.filter;
 
 import java.io.IOException;
 
@@ -6,6 +6,7 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import com.example.lib.common.core.context.UserContextResolver;
+import com.example.lib.logging.starter.constant.LoggingConstants;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -28,12 +29,12 @@ public class UserContextMdcFilter implements Filter {
             throws IOException, ServletException {
         
         userContextResolver.getCurrentUserContext()
-                .ifPresent(ctx -> MDC.put("userId", ctx.userId()));
+                .ifPresent(ctx -> MDC.put(LoggingConstants.MDC_USER_ID_KEY, ctx.userId()));
         
         try {
             chain.doFilter(request, response);
         } finally {
-            MDC.remove("userId");
+            MDC.remove(LoggingConstants.MDC_USER_ID_KEY);
         }
     }
 }

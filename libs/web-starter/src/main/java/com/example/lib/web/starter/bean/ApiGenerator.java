@@ -1,15 +1,17 @@
 package com.example.lib.web.starter.bean;
 
 import java.io.IOException;
-import org.slf4j.MDC;
+
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+
+import com.example.lib.common.core.context.TraceContextHolder;
 import com.example.lib.web.core.response.ApiError;
 import com.example.lib.web.core.response.ApiResult;
-import com.example.lib.web.starter.filter.MdcLoggingFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -26,7 +28,7 @@ public class ApiGenerator {
      * 바디 객체를 ApiResult로 감싸서 반환합니다.
      */
     public Object generate(Object body, ServerHttpResponse response) {
-        String traceId = MDC.get(MdcLoggingFilter.MDC_TRACE_ID_KEY);
+        String traceId = TraceContextHolder.getTraceId();
         
         if (body instanceof ApiResult) return body;
 
@@ -43,7 +45,7 @@ public class ApiGenerator {
      * HttpServletResponse 스트림에 직접 에러를 기록합니다.
      */
     public void writeStream(ApiError error, HttpServletResponse response) throws IOException {
-        String traceId = MDC.get(MdcLoggingFilter.MDC_TRACE_ID_KEY);
+        String traceId = TraceContextHolder.getTraceId();
         
         response.setStatus(error.getStatus());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
