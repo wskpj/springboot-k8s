@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface UserContextResolver {
     
     /**
-     * 현재 사용자의 식별자를 반환합니다.
+     * 현재 사용자의 컨텍스트 정보를 반환합니다.
      */
-    Optional<String> getCurrentUserIdentifier();
+    Optional<UserContext> getCurrentUserContext();
 }
