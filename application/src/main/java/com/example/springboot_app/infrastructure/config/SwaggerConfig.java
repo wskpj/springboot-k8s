@@ -4,7 +4,7 @@ import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.example.lib.security.starter.dto.AuthUser;
+import com.example.lib.common.core.context.UserContext;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -16,7 +16,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 public class SwaggerConfig {
 
     static {
-        SpringDocUtils.getConfig().addRequestWrapperToIgnore(AuthUser.class);
+        SpringDocUtils.getConfig().addRequestWrapperToIgnore(UserContext.class);
     }
 
     @Bean

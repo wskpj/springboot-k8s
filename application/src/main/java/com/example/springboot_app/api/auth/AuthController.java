@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.lib.security.starter.dto.AuthUser;
+import com.example.lib.common.core.context.UserContext;
 import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
 import com.example.springboot_app.domain.auth.dto.AuthResult;
@@ -42,15 +42,15 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public AuthResponse.UserInfo getMe(AuthUser user, String authHeader, String refreshToken) {
+    public AuthResponse.UserInfo getMe(UserContext user, String authHeader, String refreshToken) {
         String accessToken = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
-        return AuthResponse.UserInfo.from(authService.getUserInfo(user.getEmail(), accessToken, refreshToken));
+        return AuthResponse.UserInfo.from(authService.getUserInfo(user.name(), accessToken, refreshToken));
     }
 
     @Override
-    public void logout(AuthUser user, String refreshToken, HttpServletResponse response) {
+    public void logout(UserContext user, String refreshToken, HttpServletResponse response) {
         if (user != null) {
-            authService.logout(user.getId(), refreshToken);
+            authService.logout(Long.parseLong(user.userId()), refreshToken);
         }
         
         // Clear cookie

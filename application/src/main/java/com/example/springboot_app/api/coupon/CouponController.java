@@ -2,7 +2,7 @@ package com.example.springboot_app.api.coupon;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.lib.security.starter.dto.AuthUser;
+import com.example.lib.common.core.context.UserContext;
 import com.example.springboot_app.api.coupon.dto.CouponResponse;
 import com.example.springboot_app.domain.coupon.entity.Coupon;
 import com.example.springboot_app.domain.coupon.exception.CouponException;
@@ -19,8 +19,8 @@ public class CouponController implements CouponApi {
     private final CouponRepository couponRepository;
 
     @Override
-    public void issueCoupon(Long id, AuthUser user) {
-        couponService.issueCoupon(id, user.getId());
+    public void issueCoupon(Long id, UserContext user) {
+        couponService.issueCoupon(id, Long.parseLong(user.userId()));
     }
 
     @Override

@@ -1,14 +1,12 @@
 package com.example.springboot_app.infrastructure.security.filter;
 
-import com.example.lib.security.starter.dto.AuthUser;
-
 import java.io.IOException;
 import java.util.List;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.example.lib.common.core.context.UserContext;
+import com.example.lib.common.core.context.UserContextHolder;
 import com.example.springboot_app.domain.common.exception.BusinessException;
 import com.example.springboot_app.infrastructure.redis.dto.KeyBinding;
 import com.example.springboot_app.infrastructure.redis.enums.RedisStringKey;
@@ -70,15 +68,11 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
     }
 
     private String getClientIdentifier(HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.isAuthenticated()
-                && !authentication.getPrincipal().equals("anonymousUser")) {
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof AuthUser authUser) {
-                return String.valueOf(authUser.getId());
-            }
-            return authentication.getName();
+        // 도메인 컨텍스트에서 유저 정보를 직접 가져옴 (시큐리티 의존성 제거)
+        UserContext context = UserContextHolder.getContext();
+        
+        if (!context.isGuest()) {
+            return context.userId();
         }
 
         String ip = request.getHeader("X-Forwarded-For");

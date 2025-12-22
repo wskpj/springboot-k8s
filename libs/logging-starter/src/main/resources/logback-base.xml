@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+    <!-- Spring Boot Logback 설정 로드 -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
+    <!-- 공통 로깅 패턴 정의 -->
+    <!-- traceId: 요청 추적 ID -->
+    <!-- userId: 인증된 사용자 ID -->
+    <!-- clientIp: 클라이언트 IP -->
+    <property name="CONSOLE_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} [%clr(${HOSTNAME:-localhost}){green}:%clr(${PID:- }){magenta}] %clr([%15.15t]){faint} %clr(---){faint} %clr(%-35.35(%logger{30}:%L)){cyan} %clr(%5p) %clr([%X{traceId:-SYSTEM}]){faint} %m %clr(from %X{clientIp:-unknown} [%X{userId:-guest}]){faint}%n%wEx" />
+
+    <!-- 기본 텍스트 콘솔 어펜더 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- JSON 형식 어펜더 (Stage/Prod용) -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+</included>

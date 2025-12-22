@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.example.lib.security.starter.annotation.AuthPublic;
-import com.example.lib.security.starter.dto.AuthUser;
+import com.example.lib.common.core.context.UserContext;
 import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
 
@@ -37,14 +37,14 @@ public interface AuthApi {
         @Operation(summary = "Get My Info", description = "Returns current authenticated user information.")
         @GetMapping("/me")
         AuthResponse.UserInfo getMe(
-                        AuthUser user,
+                        UserContext user,
                         @RequestHeader(value = "Authorization", required = false) String authHeader,
                         @CookieValue(value = "refresh_token", required = false) String refreshToken);
 
         @Operation(summary = "User Logout", description = "Invalidates the user session and clears cookies.")
         @PostMapping("/logout")
         void logout(
-                        AuthUser user,
+                        UserContext user,
                         @CookieValue(value = "refresh_token", required = false) String refreshToken,
                         HttpServletResponse response);
 

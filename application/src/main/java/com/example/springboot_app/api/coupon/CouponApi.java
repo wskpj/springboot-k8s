@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.lib.security.starter.annotation.AuthPublic;
-import com.example.lib.security.starter.dto.AuthUser;
+import com.example.lib.common.core.context.UserContext;
 import com.example.springboot_app.api.coupon.dto.CouponResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +18,7 @@ public interface CouponApi {
 
     @Operation(summary = "Issue Coupon", description = "Issues a coupon to the authenticated user using high-concurrency Redis logic.")
     @PostMapping("/{id}/issue")
-    void issueCoupon(@PathVariable Long id, AuthUser user);
+    void issueCoupon(@PathVariable Long id, UserContext user);
 
     @Operation(summary = "Get Coupon Stock", description = "Returns the current remaining stock of a specific coupon.")
     @GetMapping("/{id}/stock")

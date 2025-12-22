@@ -1,22 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- Spring Boot Logback 설정 로드 -->
-    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <!-- logging-starter에 정의된 공통 로깅 설정 로드 -->
+    <include resource="logback-base.xml" />
 
-    <!-- 프로퍼티 설정 -->
+    <!-- 프로젝트별 로그 파일 경로 설정 -->
     <property name="LOG_FILE_PATH" value="./logs" />
-    <property name="CONSOLE_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} [%clr(${HOSTNAME:-localhost}){green}:%clr(${PID:- }){magenta}] %clr([%15.15t]){faint} %clr(---){faint} %clr(%-35.35(%logger{30}:%L)){cyan} %clr(%5p) %clr([%X{traceId}]){faint} %m %clr(from %X{clientIp:-annonymous} [%X{userInfo}]){faint}%n%wEx" />
 
-    <!-- [1] Local / Dev 환경: 모든 로그를 Plain Text로 출력 -->
+    <!-- [1] Local / Dev 환경: 텍스트 로그 및 파일 출력 -->
     <springProfile name="!(prod | stage)">
-        
-        <!-- 콘솔 출력 (Text) -->
-        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder>
-                <pattern>${CONSOLE_PATTERN}</pattern>
-            </encoder>
-        </appender>
-
         <!-- INFO/WARN 파일 출력 (Text) -->
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>${LOG_FILE_PATH}/app.log</file>
@@ -42,19 +33,12 @@
         </root>
     </springProfile>
 
-
-    <!-- [2] Prod / Stage 환경: JSON으로 stdout(표준 출력)만 수행 -->
+    <!-- [2] Prod / Stage 환경: JSON 로그만 출력 -->
     <springProfile name="prod, stage">
-
-        <!-- 콘솔 출력 (JSON) -->
-        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
-        </appender>
-
         <!-- 로거 설정 -->
         <logger name="com.example.springboot_app" level="INFO" />
         <root level="INFO">
-            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="JSON_CONSOLE" />
         </root>
     </springProfile>
 
