@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  secret: test_secret_key_that_is_long_enough_to_be_secure_for_testing_purposes
+  access-token-validity-in-seconds: 3600
+  refresh-token-validity-in-seconds: 86400
+
+app:
+  admin-emails: admin@test.com
