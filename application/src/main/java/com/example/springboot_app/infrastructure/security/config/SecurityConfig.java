@@ -28,6 +28,7 @@ import com.example.lib.security.starter.handler.CustomAuthenticationEntryPoint;
 import com.example.lib.security.starter.resolver.AuthAnnotationResolver;
 import com.example.lib.web.core.dispatcher.ErrorDispatcher;
 import com.example.lib.web.starter.bean.ApiGenerator;
+import com.example.lib.web.starter.filter.MdcLoggingFilter;
 import com.example.lib.web.starter.filter.UserContextMdcFilter;
 import com.example.lib.web.starter.filter.handler.FilterExceptionHandlingFilter;
 import com.example.springboot_app.infrastructure.redis.repository.GlobalRedisRepository;
@@ -85,8 +86,10 @@ public class SecurityConfig {
                     .authenticationEntryPoint(authenticationEntryPoint)
                     .accessDeniedHandler(accessDeniedHandler)
             )
-            // 1. 필터 계층 통합 예외 처리 필터
+            // 0. 필터 계층 통합 예외 처리 필터
             .addFilterBefore(new FilterExceptionHandlingFilter(errorDispatcher, apiGenerator), UsernamePasswordAuthenticationFilter.class)
+            // 1. MDC 로깅 필터
+            .addFilterBefore(new MdcLoggingFilter(), FilterExceptionHandlingFilter.class)
             // 2. JWT 필터
             .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
             // 3. User Context MDC 필터
