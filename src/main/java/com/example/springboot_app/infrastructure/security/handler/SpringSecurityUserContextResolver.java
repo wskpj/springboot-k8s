@@ -30,7 +30,7 @@ public class SpringSecurityUserContextResolver implements UserContextResolver {
 
             return Optional.of(new UserContext(
                 authentication.getName(), 
-                authentication.getName(), // 별도의 name 필드가 없다면 동일하게 처리
+                authentication.getName(),
                 roles,
                 Collections.emptyMap()
             ));
