@@ -11,6 +11,8 @@ import com.example.springboot_app.global.response.types.ApiError;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.stream.Collectors;
+
 @Slf4j
 @Component
 public class ValidationExceptionStrategy implements ExceptionHandleStrategy<MethodArgumentNotValidException> {
@@ -24,19 +26,20 @@ public class ValidationExceptionStrategy implements ExceptionHandleStrategy<Meth
     public ApiError handle(MethodArgumentNotValidException e, String path) {
         log(e, path);
         
-        List<FieldErrorDetail> details = e.getBindingResult()
+        List<ApiError.FieldError> details = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> new FieldErrorDetail(error.getField(), error.getDefaultMessage()))
-                .toList();
+                .map(error -> new ApiError.FieldError(
+                        error.getField(), 
+                        error.getRejectedValue() == null ? "" : error.getRejectedValue().toString(),
+                        error.getDefaultMessage()))
+                .collect(Collectors.toList());
 
-        return ApiError.of(GlobalError.BAD_REQUEST, path, details);
+        return ApiError.validation(GlobalError.BAD_REQUEST, path, details);
     }
 
     @Override
     public void log(MethodArgumentNotValidException e, String path) {
         log.info("[INFO] Validation Failed at {}: {}", path, e.getMessage());
     }
-
-    private record FieldErrorDetail(String field, String message) {}
 }
