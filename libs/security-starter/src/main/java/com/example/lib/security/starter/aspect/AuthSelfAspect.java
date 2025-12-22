@@ -11,14 +11,14 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
 
+import com.example.lib.common.core.context.UserContext;
+import com.example.lib.common.core.context.UserContextHolder;
 import com.example.lib.security.starter.annotation.AuthSelf;
-import com.example.lib.security.starter.dto.AuthUser;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @AuthSelf 어노테이션이 붙은 메서드 실행 전, 리소스의 소유권을 검증하는 Aspect입니다.
- * 현재 인증된 사용자의 ID와 경로 변수(PathVariable)로 전달된 ID를 비교합니다.
  */
 @Aspect
 @Component
@@ -26,12 +26,12 @@ public class AuthSelfAspect {
 
     @Before("@annotation(authSelf)")
     public void check(AuthSelf authSelf) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!(principal instanceof AuthUser)) {
+        UserContext user = UserContextHolder.getContext();
+        
+        if (user.isGuest()) {
             throw new AccessDeniedException("Authentication is required");
         }
         
-        AuthUser user = (AuthUser) principal;
         HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         
         @SuppressWarnings("unchecked")
@@ -42,13 +42,9 @@ public class AuthSelfAspect {
             throw new AccessDeniedException("Required path variable '" + authSelf.value() + "' is missing");
         }
 
-        try {
-            Long targetId = Long.parseLong(pathValue);
-            if (!user.getId().equals(targetId)) {
-                throw new AccessDeniedException("Access Denied: Resource ownership mismatch");
-            }
-        } catch (NumberFormatException e) {
-            throw new AccessDeniedException("Invalid resource ID format");
+        // 도메인 컨텍스트의 userId와 경로 변수를 직접 비교 (타입 독립성 확보)
+        if (!user.userId().equals(pathValue)) {
+            throw new AccessDeniedException("Access Denied: Resource ownership mismatch");
         }
     }
 }

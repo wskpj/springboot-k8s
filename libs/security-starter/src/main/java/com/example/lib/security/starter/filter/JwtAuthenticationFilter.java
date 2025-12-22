@@ -8,12 +8,12 @@ import java.util.Set;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.lib.common.core.context.UserContext;
 import com.example.lib.common.core.context.UserContextHolder;
 import com.example.lib.security.starter.bean.JwtProvider;
-import com.example.lib.security.starter.dto.AuthUser;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -45,8 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String finalRole = role != null ? role : "ROLE_USER";
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority(finalRole);
 
-                // 1. Spring Security 컨텍스트 설정 (프레임워크용)
-                AuthUser userDetails = new AuthUser(userId, email, List.of(authority));
+                // 1. Spring Security 컨텍스트 설정 (프레임워크 내부용)
+                // 전용 DTO 대신 스프링 시큐리티 표준 User 객체 사용
+                User userDetails = new User(String.valueOf(userId), "", List.of(authority));
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -9,18 +9,16 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import com.example.lib.common.core.context.UserContext;
 import com.example.lib.common.core.context.UserContextHolder;
-import com.example.lib.security.starter.dto.AuthUser;
 
 /**
- * 컨트롤러 메서드 파라미터로 AuthUser DTO를 주입받을 수 있게 해주는 리졸버입니다.
- * 이제 시큐리티 프레임워크가 아닌, 도메인 UserContextHolder를 직접 참조합니다.
+ * 컨트롤러 메서드 파라미터로 도메인 UserContext를 주입받을 수 있게 해주는 리졸버입니다.
  */
 @Component
-public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
+public class UserContextArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterType().equals(AuthUser.class);
+        return parameter.getParameterType().equals(UserContext.class);
     }
 
     @Override
@@ -33,7 +31,6 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
             return null;
         }
         
-        // 도메인 컨텍스트의 정보를 바탕으로 프레임워크용 AuthUser DTO 생성
-        return new AuthUser(Long.parseLong(context.userId()), context.name(), null);
+        return context;
     }
 }
