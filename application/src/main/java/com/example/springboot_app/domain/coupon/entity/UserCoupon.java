@@ -1,6 +1,6 @@
 package com.example.springboot_app.domain.coupon.entity;
 
-import com.example.lib.jpa.core.entity.BaseEntity;
+import com.example.lib.jpa.core.entity.VersionedBaseEntity;
 
 import com.example.springboot_app.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "user_coupons")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserCoupon extends BaseEntity {
+public class UserCoupon extends VersionedBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

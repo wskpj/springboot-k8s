@@ -1,6 +1,6 @@
 package com.example.springboot_app.domain.coupon.entity;
 
-import com.example.lib.jpa.core.entity.BaseEntity;
+import com.example.lib.jpa.core.entity.VersionedBaseEntity;
 
 import java.time.LocalDateTime;
 
@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "coupons")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Coupon extends BaseEntity {
+public class Coupon extends VersionedBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

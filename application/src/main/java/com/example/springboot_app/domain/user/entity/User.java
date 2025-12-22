@@ -1,6 +1,6 @@
 package com.example.springboot_app.domain.user.entity;
 
-import com.example.lib.jpa.core.entity.BaseEntity;
+import com.example.lib.jpa.core.entity.VersionedBaseEntity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends BaseEntity {
+public class User extends VersionedBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
