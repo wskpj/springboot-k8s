@@ -45,8 +45,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String finalRole = role != null ? role : "ROLE_USER";
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority(finalRole);
 
-                // 1. Spring Security 컨텍스트 설정 (프레임워크 내부용)
-                // 전용 DTO 대신 스프링 시큐리티 표준 User 객체 사용
+                // 1. Spring Security 컨텍스트 설정 (프레임워크 내부 호환성 및 표준 인터페이스 유지용)
+                // 비즈니스 로직에서는 UserContext를 우선 사용하지만, 시큐리티 필터 체인 및 관련 라이브러리 지원을 위해 유지합니다.
                 User userDetails = new User(String.valueOf(userId), "", List.of(authority));
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
