@@ -1,7 +1,5 @@
 package com.example.springboot_app.global.exception.strategy.warn;
 
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
 import com.example.springboot_app.global.exception.enums.GlobalError;
@@ -18,17 +16,13 @@ public class BusinessExceptionStrategy implements ExceptionHandleStrategy<Except
 
     @Override
     public boolean supports(Exception e) {
-        return e instanceof AuthenticationException ||
-               e instanceof AccessDeniedException ||
-               e instanceof BusinessBaseException;
+        return e instanceof BusinessBaseException;
     }
 
     @Override
     public ApiError handle(Exception e, String path) {
         log(e, path);
         
-        if (e instanceof AuthenticationException) return ApiError.of(GlobalError.UNAUTHORIZED, path, e.getMessage());
-        if (e instanceof AccessDeniedException) return ApiError.of(GlobalError.FORBIDDEN, path, e.getMessage());
         if (e instanceof BaseException be) return ApiError.of(be.getErrorType(), path, be.getDetails());
         
         return ApiError.of(GlobalError.BAD_REQUEST, path, e.getMessage());
