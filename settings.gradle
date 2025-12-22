@@ -1,1 +1,9 @@
 rootProject.name = 'springboot-app'
+
+include 'application'
+include 'libs:common-core'
+include 'libs:web-core'
+include 'libs:web-starter'
+include 'libs:jpa-core'
+include 'libs:jpa-starter'
+include 'libs:security-starter'

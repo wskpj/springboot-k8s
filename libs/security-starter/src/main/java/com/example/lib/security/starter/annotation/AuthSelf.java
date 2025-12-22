@@ -5,16 +5,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-<<<<<<<< HEAD:src/main/java/com/example/springboot_app/domain/auth/annotations/AuthSelf.java
-@Target({ElementType.METHOD, ElementType.TYPE})
-========
 /**
- * 리소스의 소유자가 본인인지 검증이 필요한 API임을 표시하는 어노테이션입니다.
- * value는 소유자 ID가 포함된 경로 변수(PathVariable)의 이름입니다.
+ * 본인의 리소스에만 접근 가능한 API임을 표시하는 어노테이션입니다.
+ * (예: 자신의 정보 수정 등)
  */
 @Target({ ElementType.METHOD, ElementType.TYPE })
->>>>>>>> 5251f70 (squash with security starter):libs/security-starter/src/main/java/com/example/lib/security/starter/annotation/AuthSelf.java
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AuthSelf {
+    /**
+     * 검증에 사용할 대상 ID의 경로 변수(PathVariable) 이름입니다.
+     * 기본값은 "id" 입니다.
+     */
     String value() default "id";
 }
