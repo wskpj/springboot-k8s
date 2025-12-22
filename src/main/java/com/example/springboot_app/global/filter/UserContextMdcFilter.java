@@ -6,6 +6,7 @@ import org.slf4j.MDC;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.springboot_app.global.context.UserContext;
+import com.example.springboot_app.global.context.UserContextHolder;
 import com.example.springboot_app.global.context.UserContextResolver;
 
 import jakarta.servlet.FilterChain;
@@ -15,7 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 사용자 컨텍스트를 MDC에 추가합니다.
+ * 사용자 컨텍스트를 MDC 및 UserContextHolder에 추가합니다.
  */
 @RequiredArgsConstructor
 public class UserContextMdcFilter extends OncePerRequestFilter {
@@ -30,14 +31,17 @@ public class UserContextMdcFilter extends OncePerRequestFilter {
         UserContext context = userContextResolver.getCurrentUserContext()
                 .orElseGet(UserContext::guest);
 
+        // 1. MDC 설정 (로깅용)
         MDC.put(MDC_USER_INFO_KEY, context.userId());
-        // 추가 정보를 MDC에 더 넣고 싶다면 여기서 확장 가능
-        // MDC.put("userRoles", context.roles().toString());
+        
+        // 2. UserContextHolder 설정 (도메인/글로벌 코드 접근용)
+        UserContextHolder.setContext(context);
 
         try {
             filterChain.doFilter(request, response);
         } finally {
             MDC.remove(MDC_USER_INFO_KEY);
+            UserContextHolder.clearContext();
         }
     }
 }

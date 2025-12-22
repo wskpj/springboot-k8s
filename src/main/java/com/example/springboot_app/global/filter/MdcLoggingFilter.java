@@ -20,35 +20,34 @@ import lombok.extern.slf4j.Slf4j;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class MdcLoggingFilter extends OncePerRequestFilter {
 
-    public static final String REQUEST_ID_HEADER = "X-Request-ID";
-    public static final String MDC_REQUEST_ID_KEY = "requestId";
+    public static final String TRACE_ID_HEADER = "X-Trace-ID";
+    public static final String MDC_TRACE_ID_KEY = "traceId";
     public static final String MDC_CLIENT_IP_KEY = "clientIp";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 1. Get Request ID
-        String requestId = request.getHeader(REQUEST_ID_HEADER);
-        if (requestId == null || requestId.isBlank()) {
-            requestId = UUID.randomUUID().toString();
+        // 1. Get Trace ID
+        String traceId = request.getHeader(TRACE_ID_HEADER);
+        if (traceId == null || traceId.isBlank()) {
+            traceId = UUID.randomUUID().toString();
         }
 
-        // 2. Extract Client IP (Considering Proxy/L7)
+        // 2. Extract Client IP
         String clientIp = request.getHeader("X-Forwarded-For");
         if (clientIp == null || clientIp.isBlank() || "unknown".equalsIgnoreCase(clientIp)) {
             clientIp = request.getRemoteAddr();
         } else {
-            // X-Forwarded-For can contain multiple IPs, the first one is the original client
             clientIp = clientIp.split(",")[0].trim();
         }
 
         // 3. Put to MDC
-        MDC.put(MDC_REQUEST_ID_KEY, requestId);
+        MDC.put(MDC_TRACE_ID_KEY, traceId);
         MDC.put(MDC_CLIENT_IP_KEY, clientIp);
         
-        request.setAttribute(MDC_REQUEST_ID_KEY, requestId);
-        response.setHeader(REQUEST_ID_HEADER, requestId);
+        request.setAttribute(MDC_TRACE_ID_KEY, traceId);
+        response.setHeader(TRACE_ID_HEADER, traceId);
 
         long startTime = System.currentTimeMillis();
         try {
@@ -67,7 +66,7 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
             }
 
             // 5. Clear MDC
-            MDC.remove(MDC_REQUEST_ID_KEY);
+            MDC.remove(MDC_TRACE_ID_KEY);
             MDC.remove(MDC_CLIENT_IP_KEY);
         }
     }

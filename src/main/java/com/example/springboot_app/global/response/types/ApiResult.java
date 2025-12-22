@@ -11,23 +11,23 @@ public class ApiResult<T> {
 
     private final boolean success;
     private final String timestamp;
-    private final String requestId;
+    private final String traceId;
     private final T data;
     private final ApiError error;
 
-    private ApiResult(boolean success, String requestId, T data, ApiError error) {
+    private ApiResult(boolean success, String traceId, T data, ApiError error) {
         this.success = success;
         this.timestamp = OffsetDateTime.now().toString();
-        this.requestId = requestId;
+        this.traceId = traceId;
         this.data = data;
         this.error = error;
     }
 
-    public static <T> ApiResult<T> success(T data, String requestId) {
-        return new ApiResult<>(true, requestId, data, null);
+    public static <T> ApiResult<T> success(T data, String traceId) {
+        return new ApiResult<>(true, traceId, data, null);
     }
 
-    public static <T> ApiResult<T> fail(ApiError error, String requestId) {
-        return new ApiResult<>(false, requestId, null, error);
+    public static <T> ApiResult<T> fail(ApiError error, String traceId) {
+        return new ApiResult<>(false, traceId, null, error);
     }
 }
