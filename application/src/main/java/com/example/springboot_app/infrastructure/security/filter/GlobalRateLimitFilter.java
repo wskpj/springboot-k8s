@@ -51,7 +51,7 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
         long remaining = count != null ? Math.max(0, limit - count) : 0;
 
         // TTL은 여전히 RedisStringService를 통해 조회 가능
-        KeyBinding<RedisStringKey> key = RedisStringKey.RATE_LIMIT.bind(identifier, requestUri);
+        var key = RedisStringKey.RATE_LIMIT.bind(identifier, requestUri);
         long reset = redisStringService.getExpire(key);
 
         response.setHeader("X-RateLimit-Limit", String.valueOf(limit));

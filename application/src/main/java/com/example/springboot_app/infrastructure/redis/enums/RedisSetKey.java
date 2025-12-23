@@ -12,5 +12,4 @@ public enum RedisSetKey implements RedisKey {
     REFRESH_TOKENS("user:%d:refresh_tokens");
 
     private final String pattern;
-
 }

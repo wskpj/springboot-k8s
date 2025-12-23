@@ -12,5 +12,4 @@ public enum RedisStringKey implements RedisKey {
     LOGIN_FAIL_COUNT("login_fail:%s");
 
     private final String pattern;
-
 }

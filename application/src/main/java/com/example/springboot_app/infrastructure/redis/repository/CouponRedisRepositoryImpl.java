@@ -32,10 +32,10 @@ public class CouponRedisRepositoryImpl implements CouponRedisRepository {
     @LuaExecute
     public Long issueCoupon(Long couponId, Long userId) {
         // 1. Bind keys
-        KeyBinding<RedisStringKey> stockKey = RedisStringKey.COUPON_STOCK.bind(couponId);
-        KeyBinding<RedisSetKey> userSetKey = RedisSetKey.COUPON_ISSUED_USERS.bind(couponId);
-        KeyBinding<RedisListKey> queueKey = RedisListKey.COUPON_ISSUE_QUEUE.bind();
-        KeyBinding<RedisSetKey> syncKey = RedisSetKey.COUPON_SYNC_IDS.bind();
+        var stockKey = RedisStringKey.COUPON_STOCK.bind(couponId);
+        var userSetKey = RedisSetKey.COUPON_ISSUED_USERS.bind(couponId);
+        var queueKey = RedisListKey.COUPON_ISSUE_QUEUE.bind();
+        var syncKey = RedisSetKey.COUPON_SYNC_IDS.bind();
 
         // 2. Execute script
         return scriptExecutor.execute(
@@ -45,14 +45,14 @@ public class CouponRedisRepositoryImpl implements CouponRedisRepository {
     }
 
     public boolean initializeStock(Long couponId, int quantity) {
-        KeyBinding<RedisStringKey> key = RedisStringKey.COUPON_STOCK.bind(couponId);
-        ValueBinding value = ValueBinding.of(String.valueOf(quantity));
+        var key = RedisStringKey.COUPON_STOCK.bind(couponId);
+        var value = ValueBinding.of(quantity);
         return redisStringService.setIfAbsent(key, value);
     }
 
     public void setStock(Long couponId, int quantity) {
-        KeyBinding<RedisStringKey> key = RedisStringKey.COUPON_STOCK.bind(couponId);
-        ValueBinding value = ValueBinding.of(String.valueOf(quantity));
+        var key = RedisStringKey.COUPON_STOCK.bind(couponId);
+        var value = ValueBinding.of(quantity);
         redisStringService.set(key, value);
     }
 
@@ -62,41 +62,41 @@ public class CouponRedisRepositoryImpl implements CouponRedisRepository {
     }
 
     public Long decreaseStock(Long couponId) {
-        KeyBinding<RedisStringKey> key = RedisStringKey.COUPON_STOCK.bind(couponId);
+        var key = RedisStringKey.COUPON_STOCK.bind(couponId);
         return redisStringService.decrement(key);
     }
 
     public void increaseStock(Long couponId) {
-        KeyBinding<RedisStringKey> key = RedisStringKey.COUPON_STOCK.bind(couponId);
+        var key = RedisStringKey.COUPON_STOCK.bind(couponId);
         redisStringService.increment(key);
     }
 
     public boolean isAlreadyIssued(Long couponId, Long userId) {
-        KeyBinding<RedisSetKey> key = RedisSetKey.COUPON_ISSUED_USERS.bind(couponId);
-        ValueBinding value = ValueBinding.of(String.valueOf(userId));
+        var key = RedisSetKey.COUPON_ISSUED_USERS.bind(couponId);
+        var value = ValueBinding.of(userId);
         return redisSetService.isMember(key, value);
     }
 
     public void addIssuedUser(Long couponId, Long userId) {
-        KeyBinding<RedisSetKey> key = RedisSetKey.COUPON_ISSUED_USERS.bind(couponId);
-        ValueBinding value = ValueBinding.of(String.valueOf(userId));
+        var key = RedisSetKey.COUPON_ISSUED_USERS.bind(couponId);
+        var value = ValueBinding.of(userId);
         redisSetService.add(key, value);
     }
 
     public void addIssueEvent(Long userId, Long couponId) {
-        KeyBinding<RedisListKey> key = RedisListKey.COUPON_ISSUE_QUEUE.bind();
-        ValueBinding value = ValueBinding.of(userId, couponId);
+        var key = RedisListKey.COUPON_ISSUE_QUEUE.bind();
+        var value = ValueBinding.of(userId, couponId);
         redisListService.leftPush(key, value);
     }
 
     public void addSyncId(Long couponId) {
-        KeyBinding<RedisSetKey> key = RedisSetKey.COUPON_SYNC_IDS.bind();
-        ValueBinding value = ValueBinding.of(String.valueOf(couponId));
+        var key = RedisSetKey.COUPON_SYNC_IDS.bind();
+        var value = ValueBinding.of(couponId);
         redisSetService.add(key, value);
     }
 
     public Set<String> getAndClearSyncIds() {
-        KeyBinding<RedisSetKey> key = RedisSetKey.COUPON_SYNC_IDS.bind();
+        var key = RedisSetKey.COUPON_SYNC_IDS.bind();
         Set<String> members = redisSetService.members(key);
         if (members != null && !members.isEmpty()) {
             redisSetService.delete(key);
@@ -105,12 +105,12 @@ public class CouponRedisRepositoryImpl implements CouponRedisRepository {
     }
 
     public List<String> getIssueEvents(int count) {
-        KeyBinding<RedisListKey> key = RedisListKey.COUPON_ISSUE_QUEUE.bind();
+        var key = RedisListKey.COUPON_ISSUE_QUEUE.bind();
         return redisListService.range(key, 0, count - 1);
     }
 
     public void trimIssueEvents(int count) {
-        KeyBinding<RedisListKey> key = RedisListKey.COUPON_ISSUE_QUEUE.bind();
+        var key = RedisListKey.COUPON_ISSUE_QUEUE.bind();
         redisListService.trim(key, count, -1);
     }
 }
