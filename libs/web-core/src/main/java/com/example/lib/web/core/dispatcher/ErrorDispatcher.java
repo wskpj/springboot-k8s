@@ -2,17 +2,14 @@ package com.example.lib.web.core.dispatcher;
 
 import java.util.List;
 
-import org.springframework.stereotype.Component;
-
+import com.example.lib.web.core.response.ApiError;
 import com.example.lib.web.core.strategy.DefaultExceptionStrategy;
 import com.example.lib.web.core.strategy.ExceptionHandleStrategy;
-import com.example.lib.web.core.response.ApiError;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class ErrorDispatcher {
 

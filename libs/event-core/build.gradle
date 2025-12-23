@@ -3,4 +3,9 @@ plugins {
 }
 
 dependencies {
+    api project(':libs:common-core')
+    implementation 'org.springframework:spring-context'
+    
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 }

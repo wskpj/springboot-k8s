@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.stereotype.Component;
 
 import com.example.lib.common.core.context.TraceContextHolder;
 import com.example.lib.web.core.response.ApiError;
@@ -15,10 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-/**
- * 일반 응답 객체를 ApiResult 규격으로 변환하거나, 서블릿 응답 스트림에 직접 에러를 쓰는 역할을 합니다.
- */
-@Component
 @RequiredArgsConstructor
 public class ApiGenerator {
 

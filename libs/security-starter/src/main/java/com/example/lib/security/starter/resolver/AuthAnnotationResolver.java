@@ -3,7 +3,6 @@ package com.example.lib.security.starter.resolver;
 import java.lang.annotation.Annotation;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import org.springframework.web.servlet.handler.MatchableHandlerMapping;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 /**
  * 요청 핸들러에 설정된 권한 관련 어노테이션을 분석하는 클래스입니다.
  */
-@Component
 @RequiredArgsConstructor
 public class AuthAnnotationResolver {
     

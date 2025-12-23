@@ -3,6 +3,7 @@ package com.example.lib.web.core.response;
 import java.time.OffsetDateTime;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.Getter;
 
 @Getter
@@ -10,14 +11,14 @@ import lombok.Getter;
 public class ApiResult<T> {
 
     private final boolean success;
-    private final String timestamp;
+    private final OffsetDateTime timestamp;
     private final String traceId;
     private final T data;
     private final ApiError error;
 
     private ApiResult(boolean success, String traceId, T data, ApiError error) {
         this.success = success;
-        this.timestamp = OffsetDateTime.now().toString();
+        this.timestamp = OffsetDateTime.now();
         this.traceId = traceId;
         this.data = data;
         this.error = error;

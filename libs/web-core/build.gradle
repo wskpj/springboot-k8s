@@ -6,8 +6,10 @@ plugins {
 
 dependencies {
     api project(':libs:common-core')
+    
     api 'org.springframework.boot:spring-boot-starter-web'
     api 'com.fasterxml.jackson.core:jackson-annotations'
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 

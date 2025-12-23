@@ -6,7 +6,7 @@ import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import com.example.lib.event.core.EventSource;
-import com.example.lib.jpa.starter.aspect.OptimisticLockRetryAspect;
+import com.example.lib.jpa.starter.aspect.LockConflictRetryAspect;
 import com.example.lib.jpa.starter.event.JpaEventSourceHolder;
 
 /**
@@ -27,8 +27,8 @@ public abstract class JpaStarterConfig {
     }
 
     @Bean
-    public OptimisticLockRetryAspect optimisticLockRetryAspect(ApplicationEventPublisher eventPublisher) {
-        return new OptimisticLockRetryAspect(eventSource, eventPublisher);
+    public LockConflictRetryAspect lockConflictRetryAspect(ApplicationEventPublisher eventPublisher) {
+        return new LockConflictRetryAspect(eventSource, eventPublisher);
     }
 
     @Bean

@@ -6,7 +6,6 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -19,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
  * JWT 생성 및 검증을 담당하는 컴포넌트입니다.
  */
 @Slf4j
-@Component
 public class JwtProvider {
 
     @Value("${jwt.secret}")

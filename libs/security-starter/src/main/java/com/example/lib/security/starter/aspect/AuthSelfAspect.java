@@ -5,8 +5,6 @@ import java.util.Map;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
@@ -21,7 +19,6 @@ import jakarta.servlet.http.HttpServletRequest;
  * @AuthSelf 어노테이션이 붙은 메서드 실행 전, 리소스의 소유권을 검증하는 Aspect입니다.
  */
 @Aspect
-@Component
 public class AuthSelfAspect {
 
     @Before("@annotation(authSelf)")
