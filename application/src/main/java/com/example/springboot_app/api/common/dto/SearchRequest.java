@@ -2,13 +2,6 @@ package com.example.springboot_app.api.common.dto;
 
 import java.util.List;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
-import com.example.lib.jpa.core.dto.SearchParam;
-import com.example.lib.jpa.core.enums.SearchType;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record SearchRequest(
@@ -61,17 +54,5 @@ public record SearchRequest(
         }
 
         if (type == null) type = "contains";
-    }
-
-    /**
-     * 도메인 레이어용 Param으로 변환
-     */
-    public SearchParam toParam() {
-        Sort.Direction dir = "ASC".equalsIgnoreCase(direction)
-            ? Sort.Direction.ASC
-            : Sort.Direction.DESC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(dir, sortBy));
-        
-        return new SearchParam(pageable, q, fields, SearchType.from(type), dateFrom, dateTo);
     }
 }
