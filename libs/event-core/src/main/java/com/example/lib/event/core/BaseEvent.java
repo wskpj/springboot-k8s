@@ -1,6 +1,6 @@
 package com.example.lib.event.core;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import com.example.lib.common.core.context.TraceContextHolder;
@@ -17,13 +17,13 @@ public abstract sealed class BaseEvent permits BaseDomainEvent, BaseSystemEvent 
     private final EventType eventType;
     private final EventSource eventSource;
     private final String traceId;
-    private final LocalDateTime timestamp;
+    private final OffsetDateTime timestamp;
 
     protected BaseEvent(EventType eventType) {
         this.eventId = UUID.randomUUID();
         this.eventType = eventType;
         this.eventSource = eventType.getSource();
         this.traceId = TraceContextHolder.getTraceId();
-        this.timestamp = LocalDateTime.now();
+        this.timestamp = OffsetDateTime.now();
     }
 }
