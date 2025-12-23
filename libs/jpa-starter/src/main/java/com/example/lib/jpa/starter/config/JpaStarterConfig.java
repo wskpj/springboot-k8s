@@ -1,10 +1,13 @@
 package com.example.lib.jpa.starter.config;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+import com.example.lib.event.core.EventSource;
 import com.example.lib.jpa.starter.aspect.OptimisticLockRetryAspect;
+import com.example.lib.jpa.starter.event.JpaEventSourceHolder;
 
 /**
  * JPA 스타터의 기본 설정을 담은 추상 클래스입니다.
@@ -13,9 +16,19 @@ import com.example.lib.jpa.starter.aspect.OptimisticLockRetryAspect;
 @EnableJpaAuditing(auditorAwareRef = "jpaAuditorAware")
 public abstract class JpaStarterConfig {
 
+    private final EventSource eventSource;
+
+    protected JpaStarterConfig(EventSource eventSource) {
+        if (eventSource == null) {
+            throw new IllegalArgumentException("[JpaStarterConfig] EventSource must not be null. Please provide an EventSource.");
+        }
+        this.eventSource = eventSource;
+        JpaEventSourceHolder.setEventSource(eventSource);
+    }
+
     @Bean
-    public OptimisticLockRetryAspect optimisticLockRetryAspect() {
-        return new OptimisticLockRetryAspect();
+    public OptimisticLockRetryAspect optimisticLockRetryAspect(ApplicationEventPublisher eventPublisher) {
+        return new OptimisticLockRetryAspect(eventSource, eventPublisher);
     }
 
     @Bean

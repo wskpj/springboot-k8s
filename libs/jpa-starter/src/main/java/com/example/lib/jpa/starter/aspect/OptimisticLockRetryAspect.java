@@ -6,10 +6,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.Ordered;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.stereotype.Component;
 
-import com.example.lib.event.core.OptimisticLockConflictEvent;
+import com.example.lib.event.core.EventSource;
 import com.example.lib.jpa.core.annotation.OptimisticLock;
+import com.example.lib.jpa.starter.event.OptimisticLockConflictEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +20,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Aspect
-@Component
 @RequiredArgsConstructor
 public class OptimisticLockRetryAspect implements Ordered {
 
+    private final EventSource eventSource;
     private final ApplicationEventPublisher eventPublisher;
 
     @Around("@annotation(optimisticLock)")
@@ -38,6 +38,7 @@ public class OptimisticLockRetryAspect implements Ordered {
                 joinPoint.getSignature().toShortString(),
                 1,
                 false,
+                eventSource,
                 e
             ));
             throw e;
@@ -68,6 +69,7 @@ public class OptimisticLockRetryAspect implements Ordered {
             joinPoint.getSignature().toShortString(),
             maxAttempts,
             true,
+            eventSource,
             lastException
         ));
         
