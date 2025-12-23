@@ -3,8 +3,8 @@ package com.example.lib.event.starter.config;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 
-import com.example.lib.event.starter.EventPublisher;
-import com.example.lib.event.starter.SpringEventPublisher;
+import com.example.lib.event.starter.BaseEventPublisher;
+import com.example.lib.event.starter.DefaultEventPublisher;
 
 /**
  * 이벤트 시스템의 기본 설정을 담은 추상 클래스입니다.
@@ -13,7 +13,7 @@ import com.example.lib.event.starter.SpringEventPublisher;
 public abstract class EventStarterConfig {
 
     @Bean
-    public EventPublisher eventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        return new SpringEventPublisher(applicationEventPublisher);
+    public BaseEventPublisher eventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        return new DefaultEventPublisher(applicationEventPublisher);
     }
 }
