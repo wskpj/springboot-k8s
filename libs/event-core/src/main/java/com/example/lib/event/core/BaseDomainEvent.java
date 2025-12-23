@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public abstract non-sealed class BaseDomainEvent extends BaseEvent {
 
-    protected BaseDomainEvent(String source) {
-        super(source);
+    protected BaseDomainEvent(EventType eventType, String source) {
+        super(eventType, source);
     }
 }

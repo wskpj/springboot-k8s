@@ -14,14 +14,14 @@ import lombok.Getter;
 public abstract sealed class BaseEvent permits BaseDomainEvent, BaseSystemEvent {
 
     private final UUID eventId;
-    private final String eventType;
+    private final EventType eventType;
     private final String source;
     private final String traceId;
     private final LocalDateTime timestamp;
 
-    protected BaseEvent(String source) {
+    protected BaseEvent(EventType eventType, String source) {
         this.eventId = UUID.randomUUID();
-        this.eventType = this.getClass().getSimpleName();
+        this.eventType = eventType;
         this.source = source;
         this.traceId = TraceContextHolder.getTraceId();
         this.timestamp = LocalDateTime.now();
