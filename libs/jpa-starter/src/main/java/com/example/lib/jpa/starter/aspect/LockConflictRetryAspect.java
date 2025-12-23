@@ -9,7 +9,7 @@ import org.springframework.dao.OptimisticLockingFailureException;
 
 import com.example.lib.event.core.EventSource;
 import com.example.lib.jpa.core.annotation.OptimisticLock;
-import com.example.lib.jpa.starter.event.OptimisticLockConflictEvent;
+import com.example.lib.jpa.starter.event.LockConflictEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Aspect
 @RequiredArgsConstructor
-public class OptimisticLockRetryAspect implements Ordered {
+public class LockConflictRetryAspect implements Ordered {
 
     private final EventSource eventSource;
     private final ApplicationEventPublisher eventPublisher;
@@ -34,7 +34,7 @@ public class OptimisticLockRetryAspect implements Ordered {
             }
         } catch (OptimisticLockingFailureException e) {
             // 재시도가 비활성화된 경우에도 충돌 이벤트 발행
-            eventPublisher.publishEvent(new OptimisticLockConflictEvent(
+            eventPublisher.publishEvent(new LockConflictEvent(
                 joinPoint.getSignature().toShortString(),
                 1,
                 false,
@@ -65,7 +65,7 @@ public class OptimisticLockRetryAspect implements Ordered {
         log.error("[OptimisticLockRetry] All {} attempts failed. Giving up.", maxAttempts);
         
         // 최종 실패 시 이벤트 발행
-        eventPublisher.publishEvent(new OptimisticLockConflictEvent(
+        eventPublisher.publishEvent(new LockConflictEvent(
             joinPoint.getSignature().toShortString(),
             maxAttempts,
             true,

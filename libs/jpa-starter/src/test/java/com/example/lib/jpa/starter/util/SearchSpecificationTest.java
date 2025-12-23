@@ -60,6 +60,6 @@ class SearchSpecificationTest {
 
     static class TestEntity {
         private String name;
-        private java.time.LocalDateTime createdAt;
+        private java.time.OffsetDateTime createdAt;
     }
 }

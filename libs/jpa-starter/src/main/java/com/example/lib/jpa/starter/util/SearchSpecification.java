@@ -1,6 +1,6 @@
 package com.example.lib.jpa.starter.util;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,11 +53,11 @@ public class SearchSpecification {
             if (JpaUtil.checkFieldExists(root.getJavaType(), dateField)) {
                 try {
                     if (param.dateFrom() != null && !param.dateFrom().isBlank()) {
-                        LocalDateTime start = LocalDateTime.parse(param.dateFrom(), DateTimeFormatter.ISO_DATE_TIME);
+                        OffsetDateTime start = OffsetDateTime.parse(param.dateFrom(), DateTimeFormatter.ISO_DATE_TIME);
                         predicates.add(cb.greaterThanOrEqualTo(root.get(dateField), start));
                     }
                     if (param.dateTo() != null && !param.dateTo().isBlank()) {
-                        LocalDateTime end = LocalDateTime.parse(param.dateTo(), DateTimeFormatter.ISO_DATE_TIME);
+                        OffsetDateTime end = OffsetDateTime.parse(param.dateTo(), DateTimeFormatter.ISO_DATE_TIME);
                         predicates.add(cb.lessThanOrEqualTo(root.get(dateField), end));
                     }
                 } catch (Exception e) {
