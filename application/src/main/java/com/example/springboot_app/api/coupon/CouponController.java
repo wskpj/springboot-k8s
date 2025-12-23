@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.lib.common.core.context.UserContext;
 import com.example.springboot_app.api.coupon.dto.CouponResponse;
+import com.example.springboot_app.api.coupon.mapper.CouponMapper;
 import com.example.springboot_app.domain.coupon.entity.Coupon;
 import com.example.springboot_app.domain.coupon.exception.CouponException;
 import com.example.springboot_app.domain.coupon.repository.CouponRepository;
@@ -17,6 +18,7 @@ public class CouponController implements CouponApi {
 
     private final CouponService couponService;
     private final CouponRepository couponRepository;
+    private final CouponMapper couponMapper;
 
     @Override
     public void issueCoupon(Long id, UserContext user) {
@@ -25,8 +27,8 @@ public class CouponController implements CouponApi {
 
     @Override
     public CouponResponse.Stock getStock(Long id) {
-        Coupon coupon = couponRepository.findById(id)
+        return couponRepository.findById(id)
+                .map(couponMapper::toStockDto)
                 .orElseThrow(() -> new CouponException.NotFound(id));
-        return new CouponResponse.Stock(coupon.getId(), coupon.getRemainingQuantity());
     }
 }
