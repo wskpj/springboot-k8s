@@ -7,12 +7,17 @@ package com.example.lib.event.core;
 public interface EventType {
     
     /**
-     * 이벤트 코드 (예: "E001", "SYSTEM_ERROR")
+     * 이벤트 코드
      */
     String getCode();
 
     /**
-     * 이벤트 설명 (예: "쿠폰 발급 성공")
+     * 이벤트 설명
      */
     String getDescription();
+
+    /**
+     * 이벤트 발생 소스
+     */
+    EventSource getSource();
 }
