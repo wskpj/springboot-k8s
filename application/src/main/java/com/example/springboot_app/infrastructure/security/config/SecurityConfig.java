@@ -35,16 +35,16 @@ import com.example.springboot_app.infrastructure.redis.service.RedisStringServic
 import com.example.springboot_app.infrastructure.security.filter.GlobalRateLimitFilter;
 import com.example.springboot_app.infrastructure.security.policy.RateLimitPolicy;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+import com.example.lib.security.starter.config.SecurityStarterConfig;
 
 /**
  * Spring Security 설정 클래스입니다.
- * JWT 기반 인증과 권한 부여, 속도 제한 필터 등을 구성합니다.
+ * SecurityStarterConfig를 상속받아 공통 보안 빈들을 활성화합니다.
  */
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
-public class SecurityConfig {
+public class SecurityConfig extends SecurityStarterConfig {
 
     private final JwtProvider jwtProvider;
     private final AuthAnnotationResolver authResolver;
@@ -55,6 +55,37 @@ public class SecurityConfig {
     private final ApiGenerator apiGenerator;
     private final List<RateLimitPolicy> rateLimitPolicies;
     private final ErrorDispatcher errorDispatcher;
+    
+    // 로깅 및 예외 처리 필터 주입
+    private final MdcLoggingFilter mdcLoggingFilter;
+    private final UserContextMdcFilter userContextMdcFilter;
+
+    public SecurityConfig(
+            HandlerMappingIntrospector introspector,
+            JwtProvider jwtProvider,
+            AuthAnnotationResolver authResolver,
+            CustomAuthenticationEntryPoint authenticationEntryPoint,
+            CustomAccessDeniedHandler accessDeniedHandler,
+            GlobalRedisRepository globalRedisRepository,
+            RedisStringService redisStringService,
+            ApiGenerator apiGenerator,
+            List<RateLimitPolicy> rateLimitPolicies,
+            ErrorDispatcher errorDispatcher,
+            MdcLoggingFilter mdcLoggingFilter,
+            UserContextMdcFilter userContextMdcFilter) {
+        super(introspector);
+        this.jwtProvider = jwtProvider;
+        this.authResolver = authResolver;
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.accessDeniedHandler = accessDeniedHandler;
+        this.globalRedisRepository = globalRedisRepository;
+        this.redisStringService = redisStringService;
+        this.apiGenerator = apiGenerator;
+        this.rateLimitPolicies = rateLimitPolicies;
+        this.errorDispatcher = errorDispatcher;
+        this.mdcLoggingFilter = mdcLoggingFilter;
+        this.userContextMdcFilter = userContextMdcFilter;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -87,11 +118,11 @@ public class SecurityConfig {
             // 0. 필터 계층 통합 예외 처리 필터
             .addFilterBefore(new FilterExceptionHandlingFilter(errorDispatcher, apiGenerator), UsernamePasswordAuthenticationFilter.class)
             // 1. MDC 로깅 필터
-            .addFilterBefore(new MdcLoggingFilter(), FilterExceptionHandlingFilter.class)
+            .addFilterBefore(mdcLoggingFilter, FilterExceptionHandlingFilter.class)
             // 2. JWT 필터
             .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
             // 3. User Context MDC 필터
-            .addFilterAfter(new UserContextMdcFilter(), JwtAuthenticationFilter.class)
+            .addFilterAfter(userContextMdcFilter, JwtAuthenticationFilter.class)
             // 4. Rate Limit 필터
             .addFilterAfter(new GlobalRateLimitFilter(globalRedisRepository, redisStringService, rateLimitPolicies), UserContextMdcFilter.class);
 

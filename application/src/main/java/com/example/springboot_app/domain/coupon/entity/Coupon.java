@@ -2,7 +2,7 @@ package com.example.springboot_app.domain.coupon.entity;
 
 import com.example.lib.jpa.core.entity.VersionedBaseEntity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import com.example.springboot_app.domain.coupon.exception.CouponException;
 
@@ -37,7 +37,7 @@ public class Coupon extends VersionedBaseEntity {
     private Integer remainingQuantity;
 
     @Builder
-    public Coupon(String title, Integer totalQuantity, LocalDateTime startAt, LocalDateTime endAt) {
+    public Coupon(String title, Integer totalQuantity, OffsetDateTime startAt, OffsetDateTime endAt) {
         this.title = title;
         this.totalQuantity = totalQuantity;
         this.remainingQuantity = totalQuantity;

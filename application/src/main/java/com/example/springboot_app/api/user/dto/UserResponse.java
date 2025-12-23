@@ -1,6 +1,6 @@
 package com.example.springboot_app.api.user.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import com.example.springboot_app.domain.user.entity.User;
 
@@ -10,7 +10,7 @@ public class UserResponse {
         Long id,
         String email,
         String name,
-        LocalDateTime createdAt
+        OffsetDateTime createdAt
     ) {
         public static UserInfo from(User user) {
             return new UserInfo(

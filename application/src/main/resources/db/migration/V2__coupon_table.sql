@@ -4,7 +4,10 @@ CREATE TABLE coupons (
     total_quantity INT NOT NULL,
     remaining_quantity INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
+    version BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE user_coupons (
@@ -12,5 +15,8 @@ CREATE TABLE user_coupons (
     user_id BIGINT NOT NULL,
     coupon_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
+    version BIGINT NOT NULL DEFAULT 0
 );

@@ -12,6 +12,7 @@ dependencies {
     implementation project(':libs:common-core')
     implementation project(':libs:web-starter')
     implementation project(':libs:jpa-starter')
+    implementation project(':libs:event-starter')
     implementation project(':libs:security-starter')
     implementation project(':libs:logging-starter')
 
