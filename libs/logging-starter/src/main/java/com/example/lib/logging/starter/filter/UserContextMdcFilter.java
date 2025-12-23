@@ -3,7 +3,6 @@ package com.example.lib.logging.starter.filter;
 import java.io.IOException;
 
 import org.slf4j.MDC;
-import org.springframework.stereotype.Component;
 
 import com.example.lib.common.core.context.UserContext;
 import com.example.lib.common.core.context.UserContextHolder;
