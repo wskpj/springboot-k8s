@@ -9,6 +9,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.example.lib.common.core.context.trace.TraceContext;
 import com.example.lib.common.core.context.trace.TraceContextHolder;
 import com.example.lib.logging.starter.constant.LoggingConstants;
+import com.example.lib.web.core.util.IpUtil;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,12 +34,15 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
         TraceContextHolder.setContext(TraceContext.create(traceId));
         
         // 2. Logger(MDC)에 데이터 복사 (표현)
+        String clientIp = IpUtil.getClientIp(request);
         MDC.put(LoggingConstants.MDC_TRACE_ID_KEY, traceId);
+        MDC.put(LoggingConstants.MDC_CLIENT_IP_KEY, clientIp);
         
         try {
             filterChain.doFilter(request, response);
         } finally {
             MDC.remove(LoggingConstants.MDC_TRACE_ID_KEY);
+            MDC.remove(LoggingConstants.MDC_CLIENT_IP_KEY);
             TraceContextHolder.clearContext();
         }
     }

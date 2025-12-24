@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     api project(':libs:common-core')
+    api project(':libs:web-core')
     
     implementation 'org.springframework.boot:spring-boot-starter-web'
     

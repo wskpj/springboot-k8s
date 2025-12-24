@@ -26,12 +26,23 @@ public abstract class LoggingStarterConfig {
     }
 
     @Bean
+    public FilterRegistrationBean<MdcLoggingFilter> mdcLoggingFilterRegistration(MdcLoggingFilter filter) {
+        FilterRegistrationBean<MdcLoggingFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(filter);
+        registrationBean.addUrlPatterns("/*");
+        // 가장 먼저 실행 (TraceId, IP 추출)
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return registrationBean;
+    }
+
+    @Bean
     public FilterRegistrationBean<UserContextMdcFilter> userContextMdcFilterRegistration(UserContextMdcFilter filter) {
         FilterRegistrationBean<UserContextMdcFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(filter);
         registrationBean.addUrlPatterns("/*");
-        // TraceIdFilter(Ordered.HIGHEST_PRECEDENCE) 보다 다음에 실행되도록 설정
-        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        // Spring Security Filter Chain (-100) 보다 나중에 실행되도록 설정
+        // 그래야 UserContextHolder에 값이 채워진 상태로 로그를 찍음
+        registrationBean.setOrder(0); 
         return registrationBean;
     }
 }
