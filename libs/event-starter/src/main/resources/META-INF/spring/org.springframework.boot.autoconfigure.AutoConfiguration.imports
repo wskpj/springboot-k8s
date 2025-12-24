@@ -1,1 +1,2 @@
-com.example.lib.event.starter.config.EventStarterConfig
+com.example.lib.event.starter.internal.EventStarterConfig
+

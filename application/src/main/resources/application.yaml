@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:?Missing required environment variable 'SPRING_PROFILES_ACTIVE'. Please check your deployment config.}
+    active: ${SPRING_PROFILES_ACTIVE:?Missing required environment variable 'SPRING_PROFILES_ACTIVE'.}
 
   application:
     name: springboot-app
@@ -9,21 +9,6 @@ spring:
     ansi:
       enabled: always
   
-  datasource:
-    url: ${DB_URL}
-    driver-class-name: ${DB_DRIVER}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    hikari:
-      minimum-idle: ${DB_CONN_MINIMUM_IDLE}
-      maximum-pool-size: ${DB_CONN_MAXIMUM_POOL_SIZE}
-      connection-timeout: ${DB_CONN_CONNECTION_TIMEOUT}
-  
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-  
   h2:
     console:
       enabled: true
@@ -31,10 +16,10 @@ spring:
   
   jpa:
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:validate}
+      ddl-auto: validate
 
   lifecycle:
-    timeout-per-shutdown-phase: ${SHUTDOWN_TIMEOUT:30s}
+    timeout-per-shutdown-phase: 30s
 
 server:
   shutdown: graceful
@@ -51,11 +36,3 @@ management:
     web:
       exposure:
         include: health, prometheus, metrics
-
-jwt:
-  secret: ${JWT_SECRET}
-  access-token-validity-in-seconds: ${JWT_ACCESS_EXPIRATION}
-  refresh-token-validity-in-seconds: ${JWT_REFRESH_EXPIRATION}
-
-app:
-  admin-emails: ${ADMIN_EMAILS}

@@ -1,16 +1,15 @@
 package com.example.lib.common.core.context.trace;
 
-import java.time.OffsetDateTime;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
- * 현재 요청의 추적(Trace) 컨텍스트 데이터 객체 (Record)
+ * 추적 문맥을 담는 규격화된 컨테이너 클래스입니다.
  */
-public record TraceContext(
-    String traceId,
-    OffsetDateTime startTime
-) implements CurrentTrace {
-    
-    public static TraceContext create(String traceId) {
-        return new TraceContext(traceId, OffsetDateTime.now());
-    }
+@Getter
+@Accessors(fluent = true)
+@RequiredArgsConstructor
+public class TraceContext {
+    private final CurrentTrace trace;
 }

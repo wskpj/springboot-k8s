@@ -5,8 +5,7 @@ import java.util.List;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.lib.common.core.context.user.CurrentUser;
-import com.example.lib.common.core.context.user.UserContextHolder;
+import com.example.lib.common.core.context.user.UserContext;
 import com.example.springboot_app.domain.common.exception.DomainException;
 import com.example.springboot_app.infrastructure.redis.dto.KeyBinding;
 import com.example.springboot_app.infrastructure.redis.enums.RedisStringKey;
@@ -26,6 +25,7 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
     private final GlobalRedisRepository globalRedisRepository;
     private final RedisStringService redisStringService;
     private final List<RateLimitPolicy> policies;
+    private final UserContext userContext; // 정적 홀더 대신 프록시 빈 주입
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -41,16 +41,15 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
         long duration = policy.getDuration();
         String requestUri = request.getRequestURI();
 
-        // 2. 클라이언트 식별자 추출 (로그인 유저는 ID, 아니면 IP)
+        // 2. 클라이언트 식별자 추출
         String identifier = getClientIdentifier(request);
 
-        // 3. Redis 키 생성 및 카운트 증가 (Repository를 통한 루아 스크립트 실행)
+        // 3. Redis 키 생성 및 카운트 증가
         Long count = globalRedisRepository.checkAndIncrementRateLimit(identifier, requestUri, duration);
 
         // 5. 헤더에 Rate Limit 정보 추가
         long remaining = count != null ? Math.max(0, limit - count) : 0;
 
-        // TTL은 여전히 RedisStringService를 통해 조회 가능
         KeyBinding<RedisStringKey> key = RedisStringKey.RATE_LIMIT.bind(identifier, requestUri);
         long reset = redisStringService.getExpire(key);
 
@@ -68,10 +67,9 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
     }
 
     private String getClientIdentifier(HttpServletRequest request) {
-        CurrentUser context = UserContextHolder.getContext();
-        
-        if (!context.isGuest()) {
-            return String.valueOf(context.userId());
+        // 주입받은 userContext는 스타터에서 non-null(Guest 포함)을 보장합니다.
+        if (!userContext.user().isGuest()) {
+            return String.valueOf(userContext.user().userId());
         }
 
         String ip = request.getHeader("X-Forwarded-For");

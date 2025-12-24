@@ -4,7 +4,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.lib.jpa.core.dto.Paged;
-import com.example.lib.security.starter.annotation.AuthAdmin;
+import com.example.lib.security.core.annotation.AuthAdmin;
+
 import com.example.springboot_app.api.common.dto.SearchRequest;
 import com.example.springboot_app.api.user.dto.UserResponse;
 

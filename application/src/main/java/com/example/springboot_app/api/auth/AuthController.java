@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.lib.common.core.context.user.CurrentUser;
+import com.example.lib.common.core.context.user.UserContext;
 import com.example.lib.web.core.cookie.CookieManager;
 import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
@@ -25,13 +25,11 @@ public class AuthController implements AuthApi {
     private final AuthService authService;
     private final AuthMapper authMapper;
     private final CookieManager cookieManager;
-    private final CurrentUser user;
+    private final UserContext userContext;
 
     @Override
-    @ResponseStatus(HttpStatus.CREATED)
-    public AuthResponse.UserInfo signup(AuthRequest.Signup request) {
-        AuthResult.UserInfo result = authService.signup(authMapper.toSignupParam(request));
-        return authMapper.toUserInfoResponse(result);
+    public void signup(AuthRequest.Signup request) {
+        authService.signup(authMapper.toSignupParam(request));
     }
 
     @Override
@@ -52,10 +50,11 @@ public class AuthController implements AuthApi {
 
     @Override
     public void logout() {
-        if (!user.isGuest()) {
+        // userContext.user()는 항상 존재함을 신뢰할 수 있습니다.
+        if (!userContext.user().isGuest()) {
             String refreshToken = cookieManager.getCookie(REFRESH_TOKEN_COOKIE)
                     .orElseThrow(() -> new AuthException.InvalidToken());
-            authService.logout(user.userId(), refreshToken);
+            authService.logout(userContext.user().userId(), refreshToken);
         }
         cookieManager.removeCookie(REFRESH_TOKEN_COOKIE);
     }

@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.example.lib.security.starter.annotation.AuthPublic;
-import com.example.lib.security.starter.annotation.AuthSelf;
+import com.example.lib.security.core.annotation.AuthPublic;
+import com.example.lib.security.core.annotation.AuthSelf;
 import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
 
@@ -21,10 +21,9 @@ import jakarta.validation.Valid;
 public interface AuthApi {
 
     @AuthPublic
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "User Signup", description = "Creates a new user account.")
     @PostMapping("/signup")
-    AuthResponse.UserInfo signup(@RequestBody @Valid AuthRequest.Signup request);
+    void signup(@RequestBody @Valid AuthRequest.Signup request);
 
     @AuthPublic
     @Operation(summary = "User Login", description = "Authenticates user and returns access token in body and refresh token in cookie.")

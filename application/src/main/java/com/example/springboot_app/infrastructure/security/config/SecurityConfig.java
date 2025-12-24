@@ -3,7 +3,7 @@ package com.example.springboot_app.infrastructure.security.config;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,60 +11,56 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
+
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.lib.security.starter.annotation.AuthAdmin;
-import com.example.lib.security.starter.annotation.AuthPublic;
-import com.example.lib.security.starter.bean.JwtProvider;
-import com.example.lib.security.starter.filter.JwtAuthenticationFilter;
-import com.example.lib.security.starter.handler.CustomAccessDeniedHandler;
-import com.example.lib.security.starter.handler.CustomAuthenticationEntryPoint;
-import com.example.lib.security.starter.resolver.AuthAnnotationResolver;
-import com.example.lib.web.core.dispatcher.ErrorDispatcher;
-import com.example.lib.web.starter.bean.ApiGenerator;
-import com.example.lib.logging.starter.filter.MdcLoggingFilter;
-import com.example.lib.logging.starter.filter.UserContextMdcFilter;
-import com.example.lib.web.starter.filter.handler.FilterExceptionHandlingFilter;
+import com.example.lib.common.core.context.user.UserContext;
+import com.example.lib.security.core.annotation.AuthAdmin;
+import com.example.lib.security.core.annotation.AuthPublic;
+import com.example.lib.security.core.resolver.AuthResolver;
+import com.example.lib.web.core.dispatcher.ApiResultDispatcher;
+import com.example.lib.web.starter.internal.filter.StandardFilterExceptionFilter;
+
 import com.example.springboot_app.infrastructure.redis.repository.GlobalRedisRepository;
 import com.example.springboot_app.infrastructure.redis.service.RedisStringService;
 import com.example.springboot_app.infrastructure.security.filter.GlobalRateLimitFilter;
 import com.example.springboot_app.infrastructure.security.policy.RateLimitPolicy;
-import com.example.lib.security.starter.config.SecurityStarterConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Spring Security 설정 클래스입니다.
- * SecurityStarterConfig를 상속받아 공통 보안 빈들을 활성화합니다.
  */
 @Slf4j
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends SecurityStarterConfig {
-
-    public SecurityConfig(ObjectProvider<HandlerMappingIntrospector> introspectorProvider) {
-        super(introspectorProvider);
-    }
+public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(
             HttpSecurity http,
-            JwtProvider jwtProvider,
-            AuthAnnotationResolver authResolver,
-            CustomAuthenticationEntryPoint authenticationEntryPoint,
-            CustomAccessDeniedHandler accessDeniedHandler,
+            AuthResolver authResolver,
+            AuthenticationEntryPoint authenticationEntryPoint,
+            AccessDeniedHandler accessDeniedHandler,
             GlobalRedisRepository globalRedisRepository,
             RedisStringService redisStringService,
-            ApiGenerator apiGenerator,
+            ApiResultDispatcher dispatcher,
+            ObjectMapper objectMapper,
             List<RateLimitPolicy> rateLimitPolicies,
-            ErrorDispatcher errorDispatcher,
-            MdcLoggingFilter mdcLoggingFilter,
-            UserContextMdcFilter userContextMdcFilter
+            UserContext userContext, // UserContext 프록시 빈 주입
+            @Qualifier("mdcLoggingFilter") OncePerRequestFilter mdcLoggingFilter,
+            @Qualifier("userContextMdcFilter") OncePerRequestFilter userContextMdcFilter,
+            @Qualifier("jwtAuthenticationFilter") OncePerRequestFilter jwtAuthenticationFilter
     ) throws Exception {
         
         log.info("[SECURITY] Initializing Security Filter Chain...");
@@ -86,17 +82,23 @@ public class SecurityConfig extends SecurityStarterConfig {
                     .authenticationEntryPoint(authenticationEntryPoint)
                     .accessDeniedHandler(accessDeniedHandler)
             )
-            .addFilterBefore(new FilterExceptionHandlingFilter(errorDispatcher, apiGenerator), UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(mdcLoggingFilter, FilterExceptionHandlingFilter.class)
-            .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(userContextMdcFilter, JwtAuthenticationFilter.class)
-            .addFilterAfter(new GlobalRateLimitFilter(globalRedisRepository, redisStringService, rateLimitPolicies), UserContextMdcFilter.class);
+            .addFilterBefore(new StandardFilterExceptionFilter(dispatcher, objectMapper), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(mdcLoggingFilter, StandardFilterExceptionFilter.class)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(userContextMdcFilter, jwtAuthenticationFilter.getClass())
+            .addFilterAfter(new GlobalRateLimitFilter(globalRedisRepository, redisStringService, rateLimitPolicies, userContext), userContextMdcFilter.getClass());
 
         return http.build();
     }
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

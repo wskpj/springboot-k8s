@@ -1,1 +1,2 @@
-com.example.lib.web.starter.config.WebStarterConfig
+com.example.lib.web.starter.internal.WebStarterConfig
+

@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.lib.jpa.core.dto.SearchParam;
-import com.example.lib.jpa.starter.util.JpaUtil;
-import com.example.lib.jpa.starter.util.SearchSpecification;
+import com.example.lib.jpa.core.util.JpaUtil;
+import com.example.lib.jpa.core.util.SearchSpecification;
 import com.example.springboot_app.domain.user.entity.User;
 import com.example.springboot_app.domain.user.repository.UserRepository;
 
@@ -25,6 +25,6 @@ public class UserService {
     @Transactional(readOnly = true)
     public Page<User> searchUsers(SearchParam param) {
         Specification<User> spec = SearchSpecification.build(param);
-        return userRepository.findAll(spec, JpaUtil.validatePageable(param.pageable(), User.class));
+        return userRepository.findAll(spec, param.pageable());
     }
 }

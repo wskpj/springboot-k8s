@@ -11,11 +11,16 @@ COPY gradle gradle
 
 # 각 모듈의 build.gradle 복사 (의존성 캐싱을 위함)
 COPY libs/common-core/build.gradle libs/common-core/
-COPY libs/web-core/build.gradle libs/web-core/
-COPY libs/web-starter/build.gradle libs/web-starter/
+COPY libs/event-core/build.gradle libs/event-core/
+COPY libs/event-starter/build.gradle libs/event-starter/
 COPY libs/jpa-core/build.gradle libs/jpa-core/
 COPY libs/jpa-starter/build.gradle libs/jpa-starter/
+COPY libs/logging-core/build.gradle libs/logging-core/
+COPY libs/logging-starter/build.gradle libs/logging-starter/
+COPY libs/security-core/build.gradle libs/security-core/
 COPY libs/security-starter/build.gradle libs/security-starter/
+COPY libs/web-core/build.gradle libs/web-core/
+COPY libs/web-starter/build.gradle libs/web-starter/
 COPY application/build.gradle application/
 
 # 실행 권한 부여 및 의존성 다운로드 (의존성 레이어 캐싱)

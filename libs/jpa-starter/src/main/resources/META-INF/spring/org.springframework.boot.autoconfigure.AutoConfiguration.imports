@@ -1,1 +1,2 @@
-com.example.lib.jpa.starter.config.JpaStarterConfig
+com.example.lib.jpa.starter.internal.JpaStarterConfig
+

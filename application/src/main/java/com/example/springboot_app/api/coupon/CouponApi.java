@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.lib.common.core.context.user.CurrentUser;
-import com.example.lib.security.starter.annotation.AuthPublic;
+import com.example.lib.security.core.annotation.AuthPublic;
+
 import com.example.springboot_app.api.coupon.dto.CouponResponse;
 
 import io.swagger.v3.oas.annotations.Operation;

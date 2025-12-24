@@ -15,7 +15,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-import com.example.lib.security.starter.annotation.AuthAdmin;
+import com.example.lib.security.core.annotation.AuthAdmin;
+
 
 @Tag(name = "Admin Coupon API", description = "관리자 전용 쿠폰 관리 API")
 @RequestMapping("/api/v1/admin")

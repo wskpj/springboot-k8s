@@ -19,35 +19,34 @@ class UserContextHolderTest {
         UserContextHolder.clearContext();
     }
 
+    // 테스트용 CurrentUser 구현체
+    record TestUser(Long userId, String name, String token, Set<String> roles, Map<String, Object> attributes, boolean isGuest) implements CurrentUser {}
+
     @Nested
     @DisplayName("getContext()")
     class GetContext {
 
         @Test
-        @DisplayName("컨텍스트가 없으면 guest 컨텍스트를 반환한다")
-        void returnsGuestWhenNoContextSet() {
-            CurrentUser user = UserContextHolder.getContext();
-
-            assertThat(user).isNotNull();
-            assertThat(user.isGuest()).isTrue();
-            assertThat(user.userId()).isEqualTo(-1L);
-            assertThat(user.name()).isEqualTo("Guest");
+        @DisplayName("컨텍스트가 없으면 null을 반환한다")
+        void returnsNullWhenNoContextSet() {
+            UserContext context = UserContextHolder.getContext();
+            assertThat(context).isNull();
         }
 
         @Test
         @DisplayName("설정된 컨텍스트를 반환한다")
         void returnsSetContext() {
-            UserContext userContext = new UserContext(42L, "Alice", "token-abc",
-                    Set.of("ROLE_USER"), Collections.emptyMap());
-            UserContextHolder.setContext(userContext);
+            CurrentUser data = new TestUser(42L, "Alice", "token-abc", Set.of("ROLE_USER"), Collections.emptyMap(), false);
+            UserContext context = new UserContext(data);
+            UserContextHolder.setContext(context);
 
-            CurrentUser result = UserContextHolder.getContext();
+            UserContext result = UserContextHolder.getContext();
 
-            assertThat(result.userId()).isEqualTo(42L);
-            assertThat(result.name()).isEqualTo("Alice");
-            assertThat(result.token()).isEqualTo("token-abc");
-            assertThat(result.roles()).containsExactly("ROLE_USER");
-            assertThat(result.isGuest()).isFalse();
+            assertThat(result.user().userId()).isEqualTo(42L);
+            assertThat(result.user().name()).isEqualTo("Alice");
+            assertThat(result.user().token()).isEqualTo("token-abc");
+            assertThat(result.user().roles()).containsExactly("ROLE_USER");
+            assertThat(result.user().isGuest()).isFalse();
         }
     }
 
@@ -56,13 +55,13 @@ class UserContextHolderTest {
     class ClearContext {
 
         @Test
-        @DisplayName("컨텍스트를 지우면 이후 호출 시 guest를 반환한다")
-        void returnsGuestAfterClear() {
-            UserContext userContext = new UserContext(1L, "Bob", "token", Set.of(), Map.of());
-            UserContextHolder.setContext(userContext);
+        @DisplayName("컨텍스트를 지우면 이후 호출 시 null을 반환한다")
+        void returnsNullAfterClear() {
+            CurrentUser data = new TestUser(1L, "Bob", "token", Set.of(), Map.of(), false);
+            UserContextHolder.setContext(new UserContext(data));
             UserContextHolder.clearContext();
 
-            assertThat(UserContextHolder.getContext().isGuest()).isTrue();
+            assertThat(UserContextHolder.getContext()).isNull();
         }
     }
 
@@ -73,20 +72,20 @@ class UserContextHolderTest {
         @Test
         @DisplayName("다른 스레드의 컨텍스트는 공유되지 않는다")
         void contextIsThreadLocal() throws InterruptedException {
-            UserContext mainContext = new UserContext(1L, "Main", "t1", Set.of(), Map.of());
-            UserContextHolder.setContext(mainContext);
+            CurrentUser mainData = new TestUser(1L, "Main", "t1", Set.of(), Map.of(), false);
+            UserContextHolder.setContext(new UserContext(mainData));
 
-            CurrentUser[] threadResult = new CurrentUser[1];
+            UserContext[] threadResult = new UserContext[1];
             Thread otherThread = new Thread(() -> {
                 threadResult[0] = UserContextHolder.getContext();
             });
             otherThread.start();
             otherThread.join();
 
-            // 다른 스레드에서는 guest가 반환되어야 한다
-            assertThat(threadResult[0].isGuest()).isTrue();
+            // 다른 스레드에서는 null이 반환되어야 한다
+            assertThat(threadResult[0]).isNull();
             // 메인 스레드의 컨텍스트는 그대로여야 한다
-            assertThat(UserContextHolder.getContext().userId()).isEqualTo(1L);
+            assertThat(UserContextHolder.getContext().user().userId()).isEqualTo(1L);
         }
     }
 }

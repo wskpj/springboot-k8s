@@ -6,12 +6,16 @@ dependencies {
     api project(':libs:web-starter')
     api project(':libs:web-core')
     api project(':libs:common-core')
+    api project(':libs:security-core')
+
     
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
     

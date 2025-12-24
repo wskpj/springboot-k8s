@@ -5,6 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.OffsetDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("TraceContextHolder 테스트")
@@ -14,6 +16,9 @@ class TraceContextHolderTest {
     void tearDown() {
         TraceContextHolder.clearContext();
     }
+
+    // 테스트용 CurrentTrace 구현체
+    record TestTrace(String traceId, String spanId, String parentSpanId, boolean sampled, OffsetDateTime startTime) implements CurrentTrace {}
 
     @Nested
     @DisplayName("getTraceId()")
@@ -29,7 +34,8 @@ class TraceContextHolderTest {
         @DisplayName("설정된 traceId를 반환한다")
         void returnsSetTraceId() {
             String traceId = "trace-123";
-            TraceContextHolder.setContext(TraceContext.create(traceId));
+            CurrentUser data = new TestTrace(traceId, "span", null, true, OffsetDateTime.now());
+            TraceContextHolder.setContext(new TraceContext((CurrentTrace) data));
 
             assertThat(TraceContextHolder.getTraceId()).isEqualTo(traceId);
         }
@@ -46,16 +52,17 @@ class TraceContextHolderTest {
         }
 
         @Test
-        @DisplayName("설정된 TraceContext를 CurrentTrace로 반환한다")
-        void returnsContextAsCurrentTrace() {
-            TraceContext ctx = TraceContext.create("abc");
+        @DisplayName("설정된 TraceContext를 반환한다")
+        void returnsContextAsTraceContext() {
+            CurrentTrace data = new TestTrace("abc", "s1", null, true, OffsetDateTime.now());
+            TraceContext ctx = new TraceContext(data);
             TraceContextHolder.setContext(ctx);
 
-            CurrentTrace result = TraceContextHolder.getContext();
+            TraceContext result = TraceContextHolder.getContext();
 
             assertThat(result).isNotNull();
-            assertThat(result.traceId()).isEqualTo("abc");
-            assertThat(result.startTime()).isNotNull();
+            assertThat(result.trace().traceId()).isEqualTo("abc");
+            assertThat(result.trace().startTime()).isNotNull();
         }
     }
 
@@ -66,7 +73,8 @@ class TraceContextHolderTest {
         @Test
         @DisplayName("다른 스레드의 traceId는 공유되지 않는다")
         void traceIdIsThreadLocal() throws InterruptedException {
-            TraceContextHolder.setContext(TraceContext.create("main-trace"));
+            CurrentTrace data = new TestTrace("main-trace", "s1", null, true, OffsetDateTime.now());
+            TraceContextHolder.setContext(new TraceContext(data));
 
             String[] threadTraceId = new String[1];
             Thread other = new Thread(() -> {

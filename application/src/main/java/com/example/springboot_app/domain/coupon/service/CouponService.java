@@ -2,7 +2,7 @@ package com.example.springboot_app.domain.coupon.service;
 
 import org.springframework.stereotype.Service;
 
-import com.example.lib.common.core.context.user.CurrentUser;
+import com.example.lib.common.core.context.user.UserContext;
 import com.example.springboot_app.domain.coupon.exception.CouponException;
 import com.example.springboot_app.domain.coupon.redis.CouponRedisRepository;
 
@@ -15,13 +15,14 @@ import lombok.extern.slf4j.Slf4j;
 public class CouponService {
 
     private final CouponRedisRepository couponRedisRepository;
-    private final CurrentUser user;
+    private final UserContext userContext;
 
     /**
      * Redis 기반 고성능 비동기 쿠폰 발급
      */
     public void issueCoupon(Long couponId) {
-        Long userId = user.userId();
+        // userContext.user()는 항상 존재합니다.
+        Long userId = userContext.user().userId();
 
         // 1. 원자적 발급 처리 (Lua Script)
         // 0: 성공, -101: 중복 발급, -102: 재고 부족
