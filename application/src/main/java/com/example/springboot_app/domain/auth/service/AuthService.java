@@ -1,7 +1,5 @@
 package com.example.springboot_app.domain.auth.service;
 
-import com.example.lib.security.starter.bean.JwtProvider;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +7,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.lib.common.core.context.user.CurrentUser;
+import com.example.lib.security.starter.bean.JwtProvider;
 import com.example.springboot_app.domain.auth.dto.AuthParam;
 import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.auth.exception.AuthException;
@@ -31,6 +31,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final AuthRedisRepository authRedisRepository;
+    private final CurrentUser user;
 
     @Value("${app.admin-emails}")
     private List<String> adminEmails;
@@ -93,14 +94,14 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public AuthResult.UserInfo getUserInfo(String email, String accessToken, String refreshToken) {
-        User user = userRepository.findByEmail(email)
+    public AuthResult.UserInfo getUserInfo(String refreshToken) {
+        User userInfo = userRepository.findByEmail(user.name())
                 .orElseThrow(() -> new UserException.NotFound());
 
-        long atExpiresIn = jwtProvider.getExpirationRemainSeconds(accessToken);
-        long rtExpiresIn = jwtProvider.getExpirationRemainSeconds(refreshToken);
+        long atExpiresIn = jwtProvider.getExpirationRemainSeconds(user.token());
+        long rtExpiresIn = refreshToken != null ? jwtProvider.getExpirationRemainSeconds(refreshToken) : 0L;
 
-        return new AuthResult.UserInfo(user, atExpiresIn, rtExpiresIn);
+        return new AuthResult.UserInfo(userInfo, atExpiresIn, rtExpiresIn);
     }
 
     public void logout(Long userId, String refreshToken) {

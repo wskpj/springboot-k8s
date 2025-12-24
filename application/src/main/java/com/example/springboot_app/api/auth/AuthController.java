@@ -46,9 +46,8 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public AuthResponse.UserInfo getMe(String authHeader, String refreshToken) {
-        String accessToken = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
-        return authMapper.toUserInfoResponse(authService.getUserInfo(user.name(), accessToken, refreshToken));
+    public AuthResponse.UserInfo getMe(String refreshToken) {
+        return authMapper.toUserInfoResponse(authService.getUserInfo(refreshToken));
     }
 
     @Override
@@ -56,7 +55,7 @@ public class AuthController implements AuthApi {
         if (!user.isGuest() && refreshToken != null) {
             authService.logout(user.userId(), refreshToken);
         }
-        
+
         // Clear cookie
         Cookie cookie = new Cookie("refresh_token", null);
         cookie.setMaxAge(0);
@@ -76,7 +75,7 @@ public class AuthController implements AuthApi {
         Cookie cookie = new Cookie("refresh_token", tokenDto.refreshToken());
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(7 * 24 * 60 * 60); 
+        cookie.setMaxAge(7 * 24 * 60 * 60);
         response.addCookie(cookie);
 
         return authMapper.toTokenResponse(tokenDto);

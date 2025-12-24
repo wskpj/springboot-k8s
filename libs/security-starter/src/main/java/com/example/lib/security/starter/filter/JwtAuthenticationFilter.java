@@ -56,6 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserContext userContext = new UserContext(
                     userId,
                     email,
+                    token,
                     Set.of(finalRole),
                     Collections.emptyMap()
                 );

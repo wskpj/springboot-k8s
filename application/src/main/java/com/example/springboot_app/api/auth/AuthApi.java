@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -36,7 +35,6 @@ public interface AuthApi {
     @Operation(summary = "Get My Info", description = "Returns current authenticated user information.")
     @GetMapping("/me")
     AuthResponse.UserInfo getMe(
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @CookieValue(value = "refresh_token", required = false) String refreshToken);
 
     @Operation(summary = "User Logout", description = "Invalidates the user session and clears cookies.")

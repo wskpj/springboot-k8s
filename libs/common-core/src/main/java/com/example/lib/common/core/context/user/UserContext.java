@@ -10,12 +10,13 @@ import java.util.Set;
 public record UserContext(
     Long userId,
     String name,
+    String token,
     Set<String> roles,
     Map<String, Object> attributes
 ) implements CurrentUser {
     
     public static UserContext guest() {
-        return new UserContext(-1L, "Guest", Collections.emptySet(), Collections.emptyMap());
+        return new UserContext(-1L, "Guest", null, Collections.emptySet(), Collections.emptyMap());
     }
 
     @Override

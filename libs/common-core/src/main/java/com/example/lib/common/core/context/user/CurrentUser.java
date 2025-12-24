@@ -10,6 +10,7 @@ import java.util.Set;
 public interface CurrentUser {
     Long userId();
     String name();
+    String token();
     Set<String> roles();
     Map<String, Object> attributes();
     boolean isGuest();
