@@ -19,9 +19,4 @@ public abstract class BaseException extends RuntimeException {
         this.errorType = errorType;
         this.details = details;
     }
-
-    @Override
-    public synchronized Throwable fillInStackTrace() {
-        return this;
-    }
 }

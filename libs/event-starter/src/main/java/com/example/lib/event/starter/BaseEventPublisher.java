@@ -20,7 +20,7 @@ public abstract class BaseEventPublisher {
      * 이벤트를 발행합니다.
      */
     public void publish(BaseEvent event) {
-        log.debug("[EventPublish] Type: {}, ID: {}", event.getEventType(), event.getEventId());
+        log.debug("[EventPublisher] Type: {}, ID: {}", event.getEventType(), event.getEventId());
         applicationEventPublisher.publishEvent(event);
     }
 }

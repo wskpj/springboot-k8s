@@ -1,6 +1,6 @@
 package com.example.lib.web.core.strategy;
 
-import com.example.lib.web.core.exception.GlobalError;
+import com.example.lib.web.core.error.GlobalError;
 import com.example.lib.web.core.response.ApiError;
 
 import lombok.extern.slf4j.Slf4j;

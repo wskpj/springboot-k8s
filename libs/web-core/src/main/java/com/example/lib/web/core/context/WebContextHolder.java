@@ -8,12 +8,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.Optional;
 
 /**
- * 현재 HTTP 요청 및 응답에 대한 컨텍스트를 제공합니다.
+ * 현재 HTTP 요청 및 응답에 대한 컨텍스트를 제공하는 유틸리티 클래스입니다.
  * 스레드 로컬에 저장된 요청 정보를 편리하게 추출합니다.
  */
-public class WebContext {
+public class WebContextHolder {
 
-    private WebContext() {
+    private WebContextHolder() {
     }
 
     /**

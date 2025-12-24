@@ -53,7 +53,7 @@ public class LockConflictRetryAspect implements Ordered {
                 return joinPoint.proceed();
             } catch (OptimisticLockingFailureException e) {
                 lastException = e;
-                log.warn("[OptimisticLockRetry] Attempt {}/{} failed due to optimistic lock conflict. Method: {}", 
+                log.warn("[LockConflictRetry] Attempt {}/{} failed. Method: {}", 
                     attempt, maxAttempts, joinPoint.getSignature().toShortString());
                 
                 if (attempt < maxAttempts) {
@@ -62,7 +62,7 @@ public class LockConflictRetryAspect implements Ordered {
             }
         }
 
-        log.error("[OptimisticLockRetry] All {} attempts failed. Giving up.", maxAttempts);
+        log.error("[LockConflictRetry] All {} attempts failed. Giving up.", maxAttempts);
         
         // 최종 실패 시 이벤트 발행
         eventPublisher.publishEvent(new LockConflictEvent(

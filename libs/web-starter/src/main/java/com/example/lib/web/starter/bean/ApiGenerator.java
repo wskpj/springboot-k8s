@@ -28,7 +28,7 @@ public class ApiGenerator {
         if (body instanceof ApiResult) return body;
 
         if (body instanceof ApiError apiError) {
-            if (response != null) response.setStatusCode(HttpStatusCode.valueOf(apiError.getStatus()));
+            if (response != null) response.setStatusCode(HttpStatusCode.valueOf(apiError.status()));
 
             return ApiResult.fail(apiError, traceId);
         }
@@ -42,7 +42,7 @@ public class ApiGenerator {
     public void writeStream(ApiError error, HttpServletResponse response) throws IOException {
         String traceId = TraceContextHolder.getTraceId();
         
-        response.setStatus(error.getStatus());
+        response.setStatus(error.status());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
         

@@ -1,5 +1,6 @@
 package com.example.lib.logging.starter.config;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
@@ -10,10 +11,11 @@ import com.example.lib.logging.starter.filter.UserContextMdcFilter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 로깅 스타터의 기본 설정을 담은 추상 클래스입니다.
+ * 로깅 스타터의 기본 설정을 제공하는 자동 설정 클래스입니다.
  */
+@AutoConfiguration
 @RequiredArgsConstructor
-public abstract class LoggingStarterConfig {
+public class LoggingStarterConfig {
 
     @Bean
     public MdcLoggingFilter mdcLoggingFilter() {

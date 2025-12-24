@@ -3,10 +3,9 @@ package com.example.lib.web.core.strategy.info;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import com.example.lib.web.core.exception.GlobalError;
+import com.example.lib.web.core.error.GlobalError;
 import com.example.lib.web.core.response.ApiError;
 import com.example.lib.web.core.strategy.ExceptionHandleStrategy;
 
@@ -16,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
  * MethodArgumentNotValidException(Bean Validation 실패)을 처리하는 전략입니다.
  */
 @Slf4j
-@Component
 public class ValidationExceptionStrategy implements ExceptionHandleStrategy<MethodArgumentNotValidException> {
 
     @Override

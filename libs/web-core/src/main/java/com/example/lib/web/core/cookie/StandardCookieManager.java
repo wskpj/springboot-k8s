@@ -1,7 +1,5 @@
 package com.example.lib.web.core.cookie;
 
-import org.springframework.stereotype.Component;
-
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +10,6 @@ import java.util.Optional;
 /**
  * 표준 HTTP 쿠키 관리를 구현한 컴포넌트입니다.
  */
-@Component
 @RequiredArgsConstructor
 public class StandardCookieManager implements CookieManager {
 

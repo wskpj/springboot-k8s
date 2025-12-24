@@ -1,34 +1,24 @@
 package com.example.lib.web.core.response;
 
 import java.time.OffsetDateTime;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import lombok.Getter;
-
-@Getter
+/**
+ * API 정상 및 에러 응답을 감싸는 불변 객체(Record)입니다.
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApiResult<T> {
-
-    private final boolean success;
-    private final OffsetDateTime timestamp;
-    private final String traceId;
-    private final T data;
-    private final ApiError error;
-
-    private ApiResult(boolean success, String traceId, T data, ApiError error) {
-        this.success = success;
-        this.timestamp = OffsetDateTime.now();
-        this.traceId = traceId;
-        this.data = data;
-        this.error = error;
-    }
-
+public record ApiResult<T>(
+    boolean success,
+    OffsetDateTime timestamp,
+    String traceId,
+    T data,
+    ApiError error
+) {
     public static <T> ApiResult<T> ok(T data, String traceId) {
-        return new ApiResult<>(true, traceId, data, null);
+        return new ApiResult<>(true, OffsetDateTime.now(), traceId, data, null);
     }
 
     public static <T> ApiResult<T> fail(ApiError error, String traceId) {
-        return new ApiResult<>(false, traceId, null, error);
+        return new ApiResult<>(false, OffsetDateTime.now(), traceId, null, error);
     }
 }
