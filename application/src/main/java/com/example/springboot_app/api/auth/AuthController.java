@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.lib.common.core.context.user.CurrentUser;
+import com.example.lib.web.core.cookie.CookieManager;
 import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
 import com.example.springboot_app.api.auth.mapper.AuthMapper;
@@ -12,16 +13,18 @@ import com.example.springboot_app.domain.auth.dto.AuthResult;
 import com.example.springboot_app.domain.auth.exception.AuthException;
 import com.example.springboot_app.domain.auth.service.AuthService;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 public class AuthController implements AuthApi {
 
+    private static final String REFRESH_TOKEN_COOKIE = "refresh_token";
+    private static final int REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60; // 7 days
+
     private final AuthService authService;
     private final AuthMapper authMapper;
+    private final CookieManager cookieManager;
     private final CurrentUser user;
 
     @Override
@@ -32,51 +35,38 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public AuthResponse.Token login(AuthRequest.Login request, HttpServletResponse response) {
+    public AuthResponse.Token login(AuthRequest.Login request) {
         AuthResult.Token tokenDto = authService.login(authMapper.toLoginParam(request));
 
-        // Set refresh token as http-only cookie
-        Cookie cookie = new Cookie("refresh_token", tokenDto.refreshToken());
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
-        response.addCookie(cookie);
+        cookieManager.addCookie(REFRESH_TOKEN_COOKIE, tokenDto.refreshToken(), REFRESH_TOKEN_MAX_AGE);
 
         return authMapper.toTokenResponse(tokenDto);
     }
 
     @Override
-    public AuthResponse.UserInfo getMe(String refreshToken) {
+    public AuthResponse.UserInfo getMe() {
+        String refreshToken = cookieManager.getCookie(REFRESH_TOKEN_COOKIE)
+                .orElseThrow(() -> new AuthException.InvalidToken());
         return authMapper.toUserInfoResponse(authService.getUserInfo(refreshToken));
     }
 
     @Override
-    public void logout(String refreshToken, HttpServletResponse response) {
-        if (!user.isGuest() && refreshToken != null) {
+    public void logout() {
+        if (!user.isGuest()) {
+            String refreshToken = cookieManager.getCookie(REFRESH_TOKEN_COOKIE)
+                    .orElseThrow(() -> new AuthException.InvalidToken());
             authService.logout(user.userId(), refreshToken);
         }
-
-        // Clear cookie
-        Cookie cookie = new Cookie("refresh_token", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(cookie);
+        cookieManager.removeCookie(REFRESH_TOKEN_COOKIE);
     }
 
     @Override
-    public AuthResponse.Token refresh(String refreshToken, HttpServletResponse response) {
-        if (refreshToken == null) {
-            throw new AuthException.InvalidToken();
-        }
-
+    public AuthResponse.Token refresh() {
+        String refreshToken = cookieManager.getCookie(REFRESH_TOKEN_COOKIE)
+                .orElseThrow(() -> new AuthException.InvalidToken());
         AuthResult.Token tokenDto = authService.refresh(refreshToken);
 
-        // Set new refresh token
-        Cookie cookie = new Cookie("refresh_token", tokenDto.refreshToken());
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(7 * 24 * 60 * 60);
-        response.addCookie(cookie);
+        cookieManager.addCookie(REFRESH_TOKEN_COOKIE, tokenDto.refreshToken(), REFRESH_TOKEN_MAX_AGE);
 
         return authMapper.toTokenResponse(tokenDto);
     }

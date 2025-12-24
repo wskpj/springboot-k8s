@@ -105,13 +105,11 @@ public class AuthService {
     }
 
     public void logout(Long userId, String refreshToken) {
-        if (refreshToken != null) {
-            authRedisRepository.removeRefreshToken(userId, refreshToken);
-        }
+        authRedisRepository.removeRefreshToken(userId, refreshToken);
     }
 
     public AuthResult.Token refresh(String refreshToken) {
-        if (refreshToken == null || !jwtProvider.validateToken(refreshToken)) {
+        if (!jwtProvider.validateToken(refreshToken)) {
             throw new AuthException.InvalidToken();
         }
 
