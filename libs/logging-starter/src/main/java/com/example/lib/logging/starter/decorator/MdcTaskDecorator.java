@@ -5,10 +5,10 @@ import java.util.Map;
 import org.slf4j.MDC;
 import org.springframework.core.task.TaskDecorator;
 
-import com.example.lib.common.core.context.TraceContext;
-import com.example.lib.common.core.context.TraceContextHolder;
-import com.example.lib.common.core.context.UserContext;
-import com.example.lib.common.core.context.UserContextHolder;
+import com.example.lib.common.core.context.trace.TraceContext;
+import com.example.lib.common.core.context.trace.TraceContextHolder;
+import com.example.lib.common.core.context.user.UserContext;
+import com.example.lib.common.core.context.user.UserContextHolder;
 
 /**
  * 부모 스레드의 Context와 MDC를 자식 스레드(비동기 작업)로 전파하는 데코레이터입니다.
@@ -19,8 +19,8 @@ public class MdcTaskDecorator implements TaskDecorator {
     public Runnable decorate(Runnable runnable) {
         // 부모 스레드(HTTP 요청 스레드 등)의 컨텍스트 캡처
         Map<String, String> contextMap = MDC.getCopyOfContextMap();
-        UserContext userContext = UserContextHolder.getContext();
-        TraceContext traceContext = TraceContextHolder.getContext();
+        UserContext userContext = (UserContext) UserContextHolder.getContext();
+        TraceContext traceContext = (TraceContext) TraceContextHolder.getContext();
 
         return () -> {
             try {
@@ -28,11 +28,12 @@ public class MdcTaskDecorator implements TaskDecorator {
                 if (contextMap != null) {
                     MDC.setContextMap(contextMap);
                 }
-                UserContextHolder.setContext(userContext);
+                if (userContext != null) {
+                    UserContextHolder.setContext(userContext);
+                }
                 if (traceContext != null) {
                     TraceContextHolder.setContext(traceContext);
                 }
-                
                 runnable.run();
             } finally {
                 // 자식 스레드의 컨텍스트 정리

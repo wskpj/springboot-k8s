@@ -3,35 +3,34 @@ package com.example.lib.logging.starter.filter;
 import java.io.IOException;
 
 import org.slf4j.MDC;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.lib.common.core.context.UserContext;
-import com.example.lib.common.core.context.UserContextHolder;
+import com.example.lib.common.core.context.user.CurrentUser;
+import com.example.lib.common.core.context.user.UserContextHolder;
 import com.example.lib.logging.starter.constant.LoggingConstants;
 
-import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * 현재 사용자의 ID를 로그 MDC에 삽입하여 사용자별 로그 추적을 가능하게 합니다.
- * 이제 시큐리티 프레임워크가 아닌, 도메인 UserContextHolder를 직접 참조합니다.
+ * 사용자 컨텍스트 정보를 MDC에 기록하는 필터입니다.
  */
-public class UserContextMdcFilter implements Filter {
+public class UserContextMdcFilter extends OncePerRequestFilter {
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         
-        // 도메인 컨텍스트에서 유저 정보를 가져와 MDC에 설정 (시큐리티 의존성 제거)
-        UserContext context = UserContextHolder.getContext();
+        CurrentUser context = UserContextHolder.getContext();
+        
         if (!context.isGuest()) {
-            MDC.put(LoggingConstants.MDC_USER_ID_KEY, context.userId());
+            MDC.put(LoggingConstants.MDC_USER_ID_KEY, String.valueOf(context.userId()));
         }
         
         try {
-            chain.doFilter(request, response);
+            filterChain.doFilter(request, response);
         } finally {
             MDC.remove(LoggingConstants.MDC_USER_ID_KEY);
         }
