@@ -24,32 +24,32 @@ public class AuthRedisRepositoryImpl implements AuthRedisRepository {
     private final RedisLuaScriptExecutor scriptExecutor;
 
     public void addRefreshToken(Long userId, String refreshToken, long ttlSeconds) {
-        var key = RedisSetKey.REFRESH_TOKENS.bind(userId);
-        var value = ValueBinding.of(refreshToken);
+        KeyBinding<RedisSetKey> key = RedisSetKey.REFRESH_TOKENS.bind(userId);
+        ValueBinding value = ValueBinding.of(refreshToken);
         redisSetService.add(key, value);
         redisSetService.expire(key, ttlSeconds);
     }
 
     public boolean isValidRefreshToken(Long userId, String refreshToken) {
-        var key = RedisSetKey.REFRESH_TOKENS.bind(userId);
-        var value = ValueBinding.of(refreshToken);
+        KeyBinding<RedisSetKey> key = RedisSetKey.REFRESH_TOKENS.bind(userId);
+        ValueBinding value = ValueBinding.of(refreshToken);
         return redisSetService.isMember(key, value);
     }
 
     public void removeRefreshToken(Long userId, String refreshToken) {
-        var key = RedisSetKey.REFRESH_TOKENS.bind(userId);
-        var value = ValueBinding.of(refreshToken);
+        KeyBinding<RedisSetKey> key = RedisSetKey.REFRESH_TOKENS.bind(userId);
+        ValueBinding value = ValueBinding.of(refreshToken);
         redisSetService.remove(key, value);
     }
 
     public void removeAllRefreshTokens(Long userId) {
-        var key = RedisSetKey.REFRESH_TOKENS.bind(userId);
+        KeyBinding<RedisSetKey> key = RedisSetKey.REFRESH_TOKENS.bind(userId);
         redisSetService.delete(key);
     }
 
     @LuaExecute
     public Long incrementLoginFailCount(String email, long lockDurationSeconds) {
-        var key = RedisStringKey.LOGIN_FAIL_COUNT.bind(email);
+        KeyBinding<RedisStringKey> key = RedisStringKey.LOGIN_FAIL_COUNT.bind(email);
 
         return scriptExecutor.execute(
                 RedisLuaScript.RATE_LIMIT,
@@ -58,12 +58,13 @@ public class AuthRedisRepositoryImpl implements AuthRedisRepository {
     }
 
     public int getLoginFailCount(String email) {
-        String count = redisStringService.get(RedisStringKey.LOGIN_FAIL_COUNT.bind(email));
+        KeyBinding<RedisStringKey> key = RedisStringKey.LOGIN_FAIL_COUNT.bind(email);
+        String count = redisStringService.get(key);
         return count != null ? Integer.parseInt(count) : 0;
     }
 
     public void clearLoginFailCount(String email) {
-        var key = RedisStringKey.LOGIN_FAIL_COUNT.bind(email);
+        KeyBinding<RedisStringKey> key = RedisStringKey.LOGIN_FAIL_COUNT.bind(email);
         redisStringService.delete(key);
     }
 }

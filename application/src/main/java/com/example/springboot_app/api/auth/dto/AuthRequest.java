@@ -1,7 +1,5 @@
 package com.example.springboot_app.api.auth.dto;
 
-import com.example.springboot_app.domain.auth.dto.AuthParam;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -23,11 +21,7 @@ public class AuthRequest {
         @NotBlank(message = "Name is required")
         @Schema(description = "사용자 이름", example = "홍길동")
         String name
-    ) {
-        public AuthParam.Signup toParam() {
-            return new AuthParam.Signup(email, password, name);
-        }
-    }
+    ) {}
 
     public record Login(
         @Schema(description = "이메일 주소", example = "user@example.com")
@@ -38,9 +32,5 @@ public class AuthRequest {
         @Schema(description = "비밀번호", example = "password1@Q")
         @NotBlank(message = "Password is required")
         String password
-    ) {
-        public AuthParam.Login toParam() {
-            return new AuthParam.Login(email, password);
-        }
-    }
+    ) {}
 }

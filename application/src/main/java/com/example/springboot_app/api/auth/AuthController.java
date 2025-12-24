@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.lib.common.core.context.UserContext;
+import com.example.lib.common.core.context.user.CurrentUser;
 import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
 import com.example.springboot_app.api.auth.mapper.AuthMapper;
@@ -22,11 +22,13 @@ public class AuthController implements AuthApi {
 
     private final AuthService authService;
     private final AuthMapper authMapper;
+    private final CurrentUser user;
 
     @Override
     @ResponseStatus(HttpStatus.CREATED)
-    public void signup(AuthRequest.Signup request) {
-        authService.signup(authMapper.toSignupParam(request));
+    public AuthResponse.UserInfo signup(AuthRequest.Signup request) {
+        AuthResult.UserInfo result = authService.signup(authMapper.toSignupParam(request));
+        return authMapper.toUserInfoResponse(result);
     }
 
     @Override
@@ -44,15 +46,15 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public AuthResponse.UserInfo getMe(UserContext user, String authHeader, String refreshToken) {
+    public AuthResponse.UserInfo getMe(String authHeader, String refreshToken) {
         String accessToken = (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
         return authMapper.toUserInfoResponse(authService.getUserInfo(user.name(), accessToken, refreshToken));
     }
 
     @Override
-    public void logout(UserContext user, String refreshToken, HttpServletResponse response) {
-        if (user != null) {
-            authService.logout(Long.parseLong(user.userId()), refreshToken);
+    public void logout(String refreshToken, HttpServletResponse response) {
+        if (!user.isGuest() && refreshToken != null) {
+            authService.logout(user.userId(), refreshToken);
         }
         
         // Clear cookie

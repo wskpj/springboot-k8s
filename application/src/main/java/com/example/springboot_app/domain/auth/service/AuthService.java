@@ -36,7 +36,7 @@ public class AuthService {
     private List<String> adminEmails;
 
     @Transactional
-    public void signup(AuthParam.Signup param) {
+    public AuthResult.UserInfo signup(AuthParam.Signup param) {
         if (userRepository.existsByEmail(param.email())) {
             throw new AuthException.EmailAlreadyExists(param.email());
         }
@@ -50,7 +50,8 @@ public class AuthService {
                 .role(role)
                 .build();
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return new AuthResult.UserInfo(savedUser, 0L, 0L);
     }
 
     @Transactional(readOnly = true)

@@ -18,16 +18,10 @@ import com.example.springboot_app.global.mapper.PagedMapper;
 )
 public interface AdminMapper extends PagedMapper {
 
-    /**
-     * Coupon 엔티티를 관리자용 Stock 응답 DTO로 변환합니다.
-     */
     @Mapping(target = "id", source = "id")
     @Mapping(target = "remainingQuantity", source = "remainingQuantity")
     CouponResponse.Stock toStockDto(Coupon coupon);
 
-    /**
-     * ID와 수량을 직접 Stock DTO로 매핑합니다.
-     */
     default CouponResponse.Stock toStockDto(Long id, Integer remainingQuantity) {
         return new CouponResponse.Stock(id, remainingQuantity);
     }

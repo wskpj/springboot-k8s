@@ -21,7 +21,7 @@ public class GlobalRedisRepository {
      */
     @LuaExecute
     public Long checkAndIncrementRateLimit(String identifier, String uri, long duration) {
-        var key = RedisStringKey.RATE_LIMIT.bind(identifier, uri);
+        KeyBinding<RedisStringKey> key = RedisStringKey.RATE_LIMIT.bind(identifier, uri);
         return scriptExecutor.execute(RedisLuaScript.RATE_LIMIT, key, duration);
     }
 }

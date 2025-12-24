@@ -1,7 +1,6 @@
 package com.example.springboot_app.api.auth.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
 import com.example.springboot_app.api.auth.dto.AuthRequest;

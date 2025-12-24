@@ -1,11 +1,5 @@
 package com.example.springboot_app.api.admin;
 
-
-
-
-
-
-
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.springboot_app.api.admin.dto.AdminCouponRequest;
@@ -24,7 +18,8 @@ public class AdminController implements AdminApi {
 
     @Override
     public CouponResponse.Stock createCoupon(AdminCouponRequest.Create request) {
-        return adminMapper.toStockDto(adminService.createCoupon(request.title(), request.totalQuantity()));
+        var result = adminService.createCoupon(request.title(), request.totalQuantity());
+        return adminMapper.toStockDto(result.id(), result.totalQuantity());
     }
 
     @Override

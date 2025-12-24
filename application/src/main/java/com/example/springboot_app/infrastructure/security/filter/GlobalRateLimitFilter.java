@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.lib.common.core.context.UserContext;
-import com.example.lib.common.core.context.UserContextHolder;
+import com.example.lib.common.core.context.user.CurrentUser;
+import com.example.lib.common.core.context.user.UserContextHolder;
 import com.example.springboot_app.domain.common.exception.BusinessException;
 import com.example.springboot_app.infrastructure.redis.dto.KeyBinding;
 import com.example.springboot_app.infrastructure.redis.enums.RedisStringKey;
@@ -51,7 +51,7 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
         long remaining = count != null ? Math.max(0, limit - count) : 0;
 
         // TTL은 여전히 RedisStringService를 통해 조회 가능
-        var key = RedisStringKey.RATE_LIMIT.bind(identifier, requestUri);
+        KeyBinding<RedisStringKey> key = RedisStringKey.RATE_LIMIT.bind(identifier, requestUri);
         long reset = redisStringService.getExpire(key);
 
         response.setHeader("X-RateLimit-Limit", String.valueOf(limit));
@@ -68,11 +68,10 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
     }
 
     private String getClientIdentifier(HttpServletRequest request) {
-        // 도메인 컨텍스트에서 유저 정보를 직접 가져옴 (시큐리티 의존성 제거)
-        UserContext context = UserContextHolder.getContext();
+        CurrentUser context = UserContextHolder.getContext();
         
         if (!context.isGuest()) {
-            return context.userId();
+            return String.valueOf(context.userId());
         }
 
         String ip = request.getHeader("X-Forwarded-For");

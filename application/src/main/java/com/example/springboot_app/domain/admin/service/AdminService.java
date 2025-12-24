@@ -5,6 +5,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.springboot_app.domain.coupon.dto.CouponResult;
 import com.example.springboot_app.domain.coupon.entity.Coupon;
 import com.example.springboot_app.domain.coupon.exception.CouponException;
 import com.example.springboot_app.domain.coupon.redis.CouponRedisRepository;
@@ -25,7 +26,7 @@ public class AdminService {
      * 새로운 쿠폰 생성 및 Redis 재고 웜업
      */
     @Transactional
-    public Coupon createCoupon(String title, Integer totalQuantity) {
+    public CouponResult.Created createCoupon(String title, Integer totalQuantity) {
         Coupon coupon = Coupon.builder()
                 .title(title)
                 .totalQuantity(totalQuantity)
@@ -39,7 +40,7 @@ public class AdminService {
         log.info("[AdminService] New coupon created and warmed up. CouponId: {}, Title: {}, Stock: {}",
                 savedCoupon.getId(), title, totalQuantity);
 
-        return savedCoupon;
+        return CouponResult.Created.from(savedCoupon);
     }
 
     /**

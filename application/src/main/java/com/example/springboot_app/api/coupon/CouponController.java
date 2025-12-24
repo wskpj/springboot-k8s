@@ -2,7 +2,7 @@ package com.example.springboot_app.api.coupon;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.lib.common.core.context.UserContext;
+import com.example.lib.common.core.context.user.CurrentUser;
 import com.example.springboot_app.api.coupon.dto.CouponResponse;
 import com.example.springboot_app.api.coupon.mapper.CouponMapper;
 import com.example.springboot_app.domain.coupon.entity.Coupon;
@@ -19,10 +19,11 @@ public class CouponController implements CouponApi {
     private final CouponService couponService;
     private final CouponRepository couponRepository;
     private final CouponMapper couponMapper;
+    private final CurrentUser user;
 
     @Override
-    public void issueCoupon(Long id, UserContext user) {
-        couponService.issueCoupon(id, Long.parseLong(user.userId()));
+    public void issueCoupon(Long id) {
+        couponService.issueCoupon(id);
     }
 
     @Override

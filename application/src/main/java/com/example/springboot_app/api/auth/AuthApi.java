@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.example.lib.security.starter.annotation.AuthPublic;
-import com.example.lib.common.core.context.UserContext;
 import com.example.springboot_app.api.auth.dto.AuthRequest;
 import com.example.springboot_app.api.auth.dto.AuthResponse;
 
@@ -23,34 +22,32 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/auth")
 public interface AuthApi {
 
-        @Operation(summary = "User Signup", description = "Creates a new user account.")
-        @PostMapping("/signup")
-        @AuthPublic
-        @ResponseStatus(HttpStatus.CREATED)
-        void signup(@RequestBody @Valid AuthRequest.Signup request);
+    @Operation(summary = "User Signup", description = "Creates a new user account.")
+    @PostMapping("/signup")
+    @AuthPublic
+    @ResponseStatus(HttpStatus.CREATED)
+    AuthResponse.UserInfo signup(@RequestBody @Valid AuthRequest.Signup request);
 
-        @Operation(summary = "User Login", description = "Authenticates user and returns access token in body and refresh token in cookie.")
-        @PostMapping("/login")
-        @AuthPublic
-        AuthResponse.Token login(@RequestBody @Valid AuthRequest.Login request, HttpServletResponse response);
+    @Operation(summary = "User Login", description = "Authenticates user and returns access token in body and refresh token in cookie.")
+    @PostMapping("/login")
+    @AuthPublic
+    AuthResponse.Token login(@RequestBody @Valid AuthRequest.Login request, HttpServletResponse response);
 
-        @Operation(summary = "Get My Info", description = "Returns current authenticated user information.")
-        @GetMapping("/me")
-        AuthResponse.UserInfo getMe(
-                        UserContext user,
-                        @RequestHeader(value = "Authorization", required = false) String authHeader,
-                        @CookieValue(value = "refresh_token", required = false) String refreshToken);
+    @Operation(summary = "Get My Info", description = "Returns current authenticated user information.")
+    @GetMapping("/me")
+    AuthResponse.UserInfo getMe(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @CookieValue(value = "refresh_token", required = false) String refreshToken);
 
-        @Operation(summary = "User Logout", description = "Invalidates the user session and clears cookies.")
-        @PostMapping("/logout")
-        void logout(
-                        UserContext user,
-                        @CookieValue(value = "refresh_token", required = false) String refreshToken,
-                        HttpServletResponse response);
+    @Operation(summary = "User Logout", description = "Invalidates the user session and clears cookies.")
+    @PostMapping("/logout")
+    void logout(
+            @CookieValue(value = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response);
 
-        @Operation(summary = "Refresh Token", description = "Gets a new access token using the refresh token.")
-        @PostMapping("/refresh")
-        @AuthPublic
-        AuthResponse.Token refresh(@CookieValue(value = "refresh_token", required = false) String refreshToken,
-                        HttpServletResponse response);
+    @Operation(summary = "Refresh Token", description = "Gets a new access token using the refresh token.")
+    @PostMapping("/refresh")
+    @AuthPublic
+    AuthResponse.Token refresh(@CookieValue(value = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response);
 }

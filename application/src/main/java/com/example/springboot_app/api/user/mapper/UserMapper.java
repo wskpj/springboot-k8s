@@ -16,7 +16,7 @@ import com.example.lib.jpa.core.enums.SearchType;
 import com.example.springboot_app.api.common.dto.SearchRequest;
 import com.example.springboot_app.api.user.dto.UserResponse;
 import com.example.springboot_app.domain.user.entity.User;
-import com.example.springboot_app.global.mapper.PageMapper;
+import com.example.springboot_app.global.mapper.PagedMapper;
 
 /**
  * User 도메인 관련 객체 간의 변환을 담당하는 매퍼입니다.
@@ -25,7 +25,7 @@ import com.example.springboot_app.global.mapper.PageMapper;
     componentModel = "spring",
     unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
-public interface UserMapper extends PageMapper {
+public interface UserMapper extends PagedMapper {
 
     /**
      * User 엔티티를 UserInfo 응답 DTO로 변환합니다.

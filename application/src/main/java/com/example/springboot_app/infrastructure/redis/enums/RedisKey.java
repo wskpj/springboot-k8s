@@ -7,6 +7,6 @@ public interface RedisKey {
 
     @SuppressWarnings("unchecked")
     default <K extends RedisKey> KeyBinding<K> bind(Object... args) {
-        return new KeyBinding<>((K) this, String.format(getPattern(), args));
+        return (KeyBinding<K>) new KeyBinding<>(this, String.format(getPattern(), args));
     }
 }
