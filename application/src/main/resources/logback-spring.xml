@@ -6,6 +6,10 @@
     <!-- 프로젝트별 로그 파일 경로 설정 -->
     <property name="LOG_FILE_PATH" value="./logs" />
 
+    <!-- Spring 프로퍼티로부터 로그 레벨을 읽어와 변수로 정의 (기본값 설정) -->
+    <springProperty scope="context" name="ROOT_LEVEL" source="logging.level.root" defaultValue="INFO"/>
+    <springProperty scope="context" name="APP_LEVEL" source="logging.level.com.example" defaultValue="INFO"/>
+
     <!-- [1] Local / Dev 환경: 텍스트 로그 및 파일 출력 -->
     <springProfile name="!(prod | stage)">
         <!-- INFO/WARN 파일 출력 (Text) -->
@@ -26,8 +30,8 @@
         </appender>
 
         <!-- 로거 설정 -->
-        <logger name="com.example.springboot_app" level="DEBUG" />
-        <root level="INFO">
+        <logger name="com.example" level="${APP_LEVEL}" />
+        <root level="${ROOT_LEVEL}">
             <appender-ref ref="CONSOLE" />
             <appender-ref ref="FILE" />
         </root>
@@ -36,8 +40,8 @@
     <!-- [2] Prod / Stage 환경: JSON 로그만 출력 -->
     <springProfile name="prod, stage">
         <!-- 로거 설정 -->
-        <logger name="com.example.springboot_app" level="INFO" />
-        <root level="INFO">
+        <logger name="com.example" level="${APP_LEVEL}" />
+        <root level="${ROOT_LEVEL}">
             <appender-ref ref="JSON_CONSOLE" />
         </root>
     </springProfile>

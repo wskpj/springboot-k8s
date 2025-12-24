@@ -4,7 +4,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
-import com.example.lib.web.core.exception.GlobalError;
+import com.example.lib.web.core.error.GlobalError;
 import com.example.lib.web.core.response.ApiError;
 import com.example.lib.web.core.strategy.ExceptionHandleStrategy;
 

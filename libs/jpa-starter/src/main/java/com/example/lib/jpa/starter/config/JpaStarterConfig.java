@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.auditing.DateTimeProvider;
@@ -39,11 +40,13 @@ public class JpaStarterConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean(name = "jpaAuditorAware")
     public AuditorAware<String> jpaAuditorAware() {
         return new JpaAuditorAware();
     }
 
     @Bean
+    @ConditionalOnMissingBean(name = "dateTimeProvider")
     public DateTimeProvider dateTimeProvider() {
         return () -> Optional.of(OffsetDateTime.now());
     }

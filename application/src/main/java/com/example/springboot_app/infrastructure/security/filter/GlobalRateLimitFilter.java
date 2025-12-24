@@ -7,7 +7,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.lib.common.core.context.user.CurrentUser;
 import com.example.lib.common.core.context.user.UserContextHolder;
-import com.example.springboot_app.domain.common.exception.BusinessException;
+import com.example.springboot_app.domain.common.exception.DomainException;
 import com.example.springboot_app.infrastructure.redis.dto.KeyBinding;
 import com.example.springboot_app.infrastructure.redis.enums.RedisStringKey;
 import com.example.springboot_app.infrastructure.redis.repository.GlobalRedisRepository;
@@ -60,7 +60,7 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
 
         // 6. 제한 수치 초과 시 에러 응답 및 요청 차단
         if (count != null && count > limit) {
-            throw new BusinessException.RateLimit();
+            throw new DomainException.RateLimit();
         }
 
         // 7. 제한 통과 시 다음 필터로 진행

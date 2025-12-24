@@ -1,11 +1,11 @@
 package com.example.springboot_app.domain.coupon.exception;
 
-import com.example.lib.common.core.exception.BusinessBaseException;
-import com.example.lib.web.core.exception.GlobalError;
+import com.example.lib.common.core.exception.BaseDomainException;
+import com.example.lib.web.core.error.GlobalError;
 
 public class CouponException {
 
-    public static class NotFound extends BusinessBaseException {
+    public static class NotFound extends BaseDomainException {
         public NotFound() {
             super(GlobalError.NOT_FOUND, "Coupon not found.");
         }
@@ -15,7 +15,7 @@ public class CouponException {
         }
     }
 
-    public static class OutOfStock extends BusinessBaseException {
+    public static class OutOfStock extends BaseDomainException {
         public OutOfStock() {
             super(GlobalError.BAD_REQUEST, "Coupon stock is exhausted.");
         }
@@ -25,7 +25,7 @@ public class CouponException {
         }
     }
 
-    public static class AlreadyIssued extends BusinessBaseException {
+    public static class AlreadyIssued extends BaseDomainException {
         public AlreadyIssued() {
             super(GlobalError.CONFLICT, "Coupon already issued to this user.");
         }
