@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
 
-import com.example.lib.common.core.context.TraceContextHolder;
+import com.example.lib.common.core.context.trace.TraceContextHolder;
 import com.example.lib.web.core.response.ApiError;
 import com.example.lib.web.core.response.ApiResult;
 import com.fasterxml.jackson.databind.ObjectMapper;

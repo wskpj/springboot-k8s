@@ -3,7 +3,7 @@ package com.example.lib.event.core;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import com.example.lib.common.core.context.TraceContextHolder;
+import com.example.lib.common.core.context.trace.TraceContextHolder;
 
 import lombok.Getter;
 

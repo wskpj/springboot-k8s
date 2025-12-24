@@ -6,8 +6,8 @@ import java.util.UUID;
 import org.slf4j.MDC;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.lib.common.core.context.TraceContext;
-import com.example.lib.common.core.context.TraceContextHolder;
+import com.example.lib.common.core.context.trace.TraceContext;
+import com.example.lib.common.core.context.trace.TraceContextHolder;
 import com.example.lib.logging.starter.constant.LoggingConstants;
 
 import jakarta.servlet.FilterChain;
