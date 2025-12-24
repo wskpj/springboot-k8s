@@ -19,10 +19,10 @@ public abstract sealed class BaseEvent permits BaseDomainEvent, BaseSystemEvent 
     private final String traceId;
     private final OffsetDateTime timestamp;
 
-    protected BaseEvent(EventType eventType) {
+    protected BaseEvent(EventType eventType, EventSource eventSource) {
         this.eventId = UUID.randomUUID();
         this.eventType = eventType;
-        this.eventSource = eventType.getSource();
+        this.eventSource = eventSource;
         this.traceId = TraceContextHolder.getTraceId();
         this.timestamp = OffsetDateTime.now();
     }

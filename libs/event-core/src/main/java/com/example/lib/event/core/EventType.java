@@ -15,9 +15,4 @@ public interface EventType {
      * 이벤트 설명
      */
     String getDescription();
-
-    /**
-     * 이벤트 발생 소스
-     */
-    EventSource getSource();
 }

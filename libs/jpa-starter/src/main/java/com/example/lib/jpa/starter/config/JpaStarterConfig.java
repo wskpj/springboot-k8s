@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -13,10 +14,10 @@ import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+import com.example.lib.event.core.DefaultEventType;
 import com.example.lib.event.core.EventSource;
+import com.example.lib.event.core.EventType;
 import com.example.lib.jpa.starter.aspect.LockConflictRetryAspect;
-import com.example.lib.jpa.starter.event.JpaEventSourceHolder;
-
 /**
  * JPA 스타터의 기본 설정을 제공하는 자동 설정 클래스입니다.
  */
@@ -28,15 +29,20 @@ public class JpaStarterConfig {
 
     public JpaStarterConfig(@Autowired(required = false) EventSource eventSource) {
         this.eventSource = eventSource;
-        if (eventSource != null) {
-            JpaEventSourceHolder.setEventSource(eventSource);
-        }
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "jpaLockConflictEventType")
+    public EventType jpaLockConflictEventType() {
+        return DefaultEventType.of("JPA_LOCK_CONFLICT", "낙관적 락 충돌 발생");
     }
 
     @Bean
     @ConditionalOnBean(EventSource.class)
-    public LockConflictRetryAspect lockConflictRetryAspect(ApplicationEventPublisher eventPublisher) {
-        return new LockConflictRetryAspect(eventSource, eventPublisher);
+    public LockConflictRetryAspect lockConflictRetryAspect(
+            ApplicationEventPublisher eventPublisher,
+            @Qualifier("jpaLockConflictEventType") EventType eventType) {
+        return new LockConflictRetryAspect(eventSource, eventType, eventPublisher);
     }
 
     @Bean

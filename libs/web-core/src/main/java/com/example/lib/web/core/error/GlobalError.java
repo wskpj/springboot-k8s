@@ -1,6 +1,7 @@
 package com.example.lib.web.core.error;
 
 import org.springframework.http.HttpStatus;
+
 import com.example.lib.common.core.exception.ErrorType;
 
 import lombok.Getter;

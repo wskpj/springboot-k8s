@@ -2,6 +2,7 @@ package com.example.lib.jpa.starter.event;
 
 import com.example.lib.event.core.BaseSystemEvent;
 import com.example.lib.event.core.EventSource;
+import com.example.lib.event.core.EventType;
 import lombok.Getter;
 
 /**
@@ -15,8 +16,8 @@ public class LockConflictEvent extends BaseSystemEvent {
     private final boolean retryEnabled;
     private final Throwable cause;
 
-    public LockConflictEvent(String methodName, int totalAttempts, boolean retryEnabled, EventSource eventSource, Throwable cause) {
-        super(JpaEventType.OPTIMISTIC_LOCK_CONFLICT);
+    public LockConflictEvent(EventType eventType, EventSource eventSource, String methodName, int totalAttempts, boolean retryEnabled, Throwable cause) {
+        super(eventType, eventSource);
         this.methodName = methodName;
         this.totalAttempts = totalAttempts;
         this.retryEnabled = retryEnabled;
