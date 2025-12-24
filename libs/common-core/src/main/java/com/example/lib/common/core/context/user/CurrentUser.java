@@ -7,7 +7,7 @@ import java.util.Set;
  * 현재 로그인한 사용자의 정보를 제공하는 인터페이스입니다.
  * 요청 스코프 프록시를 통해 서비스 레이어에서 안전하게 사용됩니다.
  */
-public sealed interface CurrentUser permits UserContext {
+public interface CurrentUser {
     Long userId();
     String name();
     String token();
