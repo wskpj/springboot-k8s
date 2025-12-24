@@ -1,7 +1,7 @@
-package com.example.lib.common.core.context;
+package com.example.lib.common.core.context.user;
 
 /**
- * 현재 스레드의 UserContext 홀더
+ * 현재 스레드의 사용자 컨텍스트 홀더
  */
 public class UserContextHolder {
     
@@ -11,7 +11,10 @@ public class UserContextHolder {
         CONTEXT.set(userContext);
     }
 
-    public static UserContext getContext() {
+    /**
+     * 현재 컨텍스트를 반환합니다.
+     */
+    public static CurrentUser getContext() {
         UserContext context = CONTEXT.get();
         return context != null ? context : UserContext.guest();
     }
