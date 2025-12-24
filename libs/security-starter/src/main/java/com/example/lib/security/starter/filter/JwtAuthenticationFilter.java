@@ -11,8 +11,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.lib.common.core.context.UserContext;
-import com.example.lib.common.core.context.UserContextHolder;
+import com.example.lib.common.core.context.user.UserContext;
+import com.example.lib.common.core.context.user.UserContextHolder;
 import com.example.lib.security.starter.bean.JwtProvider;
 
 import jakarta.servlet.FilterChain;
@@ -54,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // 2. 도메인 UserContext 설정 (비즈니스 로직용)
                 UserContext userContext = new UserContext(
-                    String.valueOf(userId),
+                    userId,
                     email,
                     Set.of(finalRole),
                     Collections.emptyMap()

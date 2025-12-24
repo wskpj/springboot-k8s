@@ -9,8 +9,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
 
-import com.example.lib.common.core.context.UserContext;
-import com.example.lib.common.core.context.UserContextHolder;
+import com.example.lib.common.core.context.user.CurrentUser;
+import com.example.lib.common.core.context.user.UserContextHolder;
 import com.example.lib.security.starter.annotation.AuthSelf;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +23,7 @@ public class AuthSelfAspect {
 
     @Before("@annotation(authSelf)")
     public void check(AuthSelf authSelf) {
-        UserContext user = UserContextHolder.getContext();
+        CurrentUser user = UserContextHolder.getContext();
         
         if (user.isGuest()) {
             throw new AccessDeniedException("Authentication is required");
@@ -39,8 +39,8 @@ public class AuthSelfAspect {
             throw new AccessDeniedException("Required path variable '" + authSelf.value() + "' is missing");
         }
 
-        // 도메인 컨텍스트의 userId와 경로 변수를 직접 비교 (타입 독립성 확보)
-        if (!user.userId().equals(pathValue)) {
+        // 도메인 컨텍스트의 userId(Long)와 경로 변수(String)를 문자열로 비교
+        if (!String.valueOf(user.userId()).equals(pathValue)) {
             throw new AccessDeniedException("Access Denied: Resource ownership mismatch");
         }
     }

@@ -1,5 +1,7 @@
 package com.example.lib.security.starter.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -11,11 +13,8 @@ import com.example.lib.security.starter.handler.CustomAccessDeniedHandler;
 import com.example.lib.security.starter.handler.CustomAuthenticationEntryPoint;
 import com.example.lib.security.starter.handler.SecurityExceptionStrategy;
 import com.example.lib.security.starter.resolver.AuthAnnotationResolver;
-import com.example.lib.security.starter.resolver.UserContextArgumentResolver;
 import com.example.lib.web.core.dispatcher.ErrorDispatcher;
 import com.example.lib.web.starter.bean.ApiGenerator;
-
-import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,17 +52,12 @@ public abstract class SecurityStarterConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public UserContextArgumentResolver userContextArgumentResolver() {
-        return new UserContextArgumentResolver();
-    }
-
-    @Bean
     public AuthAnnotationResolver authAnnotationResolver() {
         return new AuthAnnotationResolver(introspector);
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(userContextArgumentResolver());
+        // No longer needed as we use CurrentUser proxy injection
     }
 }
